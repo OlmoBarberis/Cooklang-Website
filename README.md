@@ -26,14 +26,14 @@ A sleek, mobile-first static website that renders a personal [Cooklang](https://
 | Cooklang parser | [`@cooklang/cooklang`](https://github.com/cooklang/cooklang-rs) v0.17 — Rust/WASM |
 | Frontmatter parser | [`gray-matter`](https://github.com/jonschlinkert/gray-matter) |
 | Fonts | Playfair Display + Lato via Google Fonts |
-| Server | nginx:alpine (Docker) |
+| Server | node:20-alpine — Astro preview (Docker) |
 | Language | TypeScript |
 
 ## Project structure
 
 ```
 .
-├── recipes/                  # Cooklang recipe files (not generated)
+├── recipes/                  # ⚠ NOT in git — mount at runtime (see Docker section)
 │   ├── *.cook
 │   ├── Guida al Sous Vide/   # Subfolder → becomes "category" on cards
 │   │   └── *.cook
@@ -56,8 +56,9 @@ A sleek, mobile-first static website that renders a personal [Cooklang](https://
 │   └── sync-images.mjs       # Copies recipes/images/ → public/images/ at build time
 ├── public/
 │   └── images/               # Populated by sync-images.mjs (gitignored)
-├── Dockerfile                # Multi-stage: node builder → nginx runner
-├── nginx.conf                # Static file serving with gzip + image caching
+├── Dockerfile                # node:20-alpine — installs deps, builds site at startup
+├── docker-compose.yml        # Example Compose file
+├── .dockerignore
 ├── astro.config.mjs
 ├── tsconfig.json
 └── package.json
@@ -111,72 +112,79 @@ npm run preview
 
 ## Docker
 
-### Build and run locally
+The `recipes/` folder is **not bundled into the image**. Instead it is mounted at runtime, and the site is built from it when the container starts. This means you can update your recipes without rebuilding the image — just restart the container.
 
-```bash
-# Build the image
-docker build -t recipes .
+### How it works
 
-# Run on port 8080
-docker run -p 8080:80 recipes
-# → http://localhost:8080
+```
+docker build   → installs Node deps, copies source code (no recipes)
+docker run     → mounts ./recipes, runs `npm run build`, serves on port 4321
 ```
 
-### Build and push to a registry
+### Running with Docker Compose (recommended)
 
-```bash
-# Tag for your registry
-docker build -t your-registry.example.com/recipes:latest .
-
-# Push
-docker push your-registry.example.com/recipes:latest
-```
-
-### Docker Hub example
-
-```bash
-docker build -t yourusername/recipes:latest .
-docker push yourusername/recipes:latest
-```
-
-### Run on a server
-
-```bash
-docker pull your-registry.example.com/recipes:latest
-docker run -d --restart unless-stopped -p 80:80 your-registry.example.com/recipes:latest
-```
-
-Or with Docker Compose:
+A `docker-compose.yml` is included in the repo. Copy it to the machine where you want to run the site and adjust the paths if needed:
 
 ```yaml
 services:
   recipes:
-    image: your-registry.example.com/recipes:latest
+    image: ghcr.io/olmobarberis/cooklang-website:latest
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "80:4321"
+    volumes:
+      - ./recipes:/app/recipes:ro
 ```
 
-The image is ~25 MB (nginx:alpine base). The build stage is discarded; only the pre-rendered static files are shipped in the final image.
+Place your `recipes/` folder next to `docker-compose.yml`, then:
 
-### What happens inside the Dockerfile
+```bash
+# Pull the latest image and start
+docker compose pull
+docker compose up -d
 
+# View logs (includes the build output on first start)
+docker compose logs -f
+
+# Apply recipe changes
+docker compose restart
 ```
-Stage 1 — builder (node:20-alpine)
-  npm ci
-  npm run build   ← syncs images, runs astro build → dist/
 
-Stage 2 — runner (nginx:alpine)
-  COPY dist/ → /usr/share/nginx/html
-  COPY nginx.conf → /etc/nginx/conf.d/default.conf
-  EXPOSE 80
+### Running with plain Docker
+
+```bash
+docker run -d \
+  --restart unless-stopped \
+  -p 80:4321 \
+  -v /path/to/your/recipes:/app/recipes:ro \
+  ghcr.io/olmobarberis/cooklang-website:latest
 ```
 
-The nginx config serves static files with `try_files $uri $uri/ $uri.html =404`, enables gzip compression, and caches `/images/*` for 30 days.
+### Building the image locally
+
+```bash
+# Build
+docker build -t cooklang-website .
+
+# Run with a local recipes folder
+docker run -p 8080:4321 -v ./recipes:/app/recipes:ro cooklang-website
+# → http://localhost:8080
+```
+
+### Building and pushing to a registry
+
+```bash
+docker build -t your-registry.example.com/cooklang-website:latest .
+docker push your-registry.example.com/cooklang-website:latest
+```
+
+A GitHub Actions workflow (`.github/workflows/docker-publish.yml`) handles this automatically when triggered manually from the Actions tab. It publishes to `ghcr.io/olmobarberis/cooklang-website` with tags in the `YYYY.MM.XX` format (e.g. `2026.05.00`) and also updates `:latest`.
 
 ## Adding or editing recipes
 
-1. Add or edit `.cook` files in the `recipes/` folder
+1. Add or edit `.cook` files in your `recipes/` folder
 2. Put recipe images in `recipes/images/`
 3. Reference local images in frontmatter as `image: images/filename.jpg`
-4. Run `npm run dev` to preview, or rebuild the Docker image to deploy
+4. Restart the container to rebuild the site: `docker compose restart`
+
+For live preview during editing, use the local dev server instead (see [Local development](#local-development)).

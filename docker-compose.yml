@@ -1,0 +1,8 @@
+services:
+  recipes:
+    image: ghcr.io/olmobarberis/cooklang-website:latest
+    restart: unless-stopped
+    ports:
+      - "80:4321"
+    volumes:
+      - ./recipes:/app/recipes:ro

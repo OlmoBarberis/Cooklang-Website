@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+public/images/
+recipes/
+.git/
+.github/
+.claude/
+README.md
+docker-compose.yml

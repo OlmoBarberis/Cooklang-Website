@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -6,14 +6,8 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build
 
-# ────────────────────────────────────────
-FROM nginx:alpine AS runner
+# recipes/ is mounted at runtime — the site is built on container startup
+EXPOSE 4321
 
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# SPA-style fallback: serve index.html for unknown paths
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
+CMD ["sh", "-c", "npm run build && node_modules/.bin/astro preview --host 0.0.0.0 --port 4321"]
