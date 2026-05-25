@@ -196,12 +196,8 @@ function scanDir(dir: string, category?: string): ParsedRecipe[] {
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
-let _cache: ParsedRecipe[] | null = null;
-
 export function getAllRecipes(): ParsedRecipe[] {
-  if (_cache) return _cache;
-  _cache = scanDir(RECIPES_DIR).sort((a, b) => a.title.localeCompare(b.title, 'it'));
-  return _cache;
+  return scanDir(RECIPES_DIR).sort((a, b) => a.title.localeCompare(b.title, 'it'));
 }
 
 export function getRecipeBySlug(slug: string): ParsedRecipe | undefined {

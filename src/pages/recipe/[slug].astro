@@ -1,14 +1,11 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import StepText from '../../components/StepText.astro';
-import { getAllRecipes, getRecipeBySlug } from '../../lib/recipes';
-
-export function getStaticPaths() {
-  return getAllRecipes().map((r) => ({ params: { slug: r.slug } }));
-}
+import { getRecipeBySlug } from '../../lib/recipes';
 
 const { slug } = Astro.params;
-const recipe = getRecipeBySlug(slug)!;
+const recipe = getRecipeBySlug(slug);
+if (!recipe) return new Response(null, { status: 404 });
 
 const isExternalImage = recipe.image?.startsWith('http');
 const imageSrc = recipe.image

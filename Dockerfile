@@ -7,7 +7,9 @@ RUN npm ci
 
 COPY . .
 
-# recipes/ is mounted at runtime — the site is built on container startup
+RUN npm run build
+
+# recipes/ is mounted at runtime — sync images and start on container startup
 EXPOSE 4321
 
-CMD ["sh", "-c", "npm run build && node_modules/.bin/astro preview --host 0.0.0.0 --port 4321"]
+CMD ["sh", "-c", "HOST=0.0.0.0 PORT=4321 npm run start"]

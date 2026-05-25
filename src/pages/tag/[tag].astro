@@ -1,14 +1,11 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RecipeCard from '../../components/RecipeCard.astro';
-import { getAllTags, getRecipesByTag } from '../../lib/recipes';
-
-export function getStaticPaths() {
-  return getAllTags().map((tag) => ({ params: { tag } }));
-}
+import { getRecipesByTag } from '../../lib/recipes';
 
 const { tag } = Astro.params;
-const recipes = getRecipesByTag(tag);
+const recipes = getRecipesByTag(tag ?? '');
+if (recipes.length === 0) return new Response(null, { status: 404 });
 const summaries = recipes.map((r) => ({
   slug: r.slug,
   title: r.title,
