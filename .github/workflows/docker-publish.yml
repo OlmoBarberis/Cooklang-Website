@@ -1,0 +1,61 @@
+name: Build and Push Docker Image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # push git tag
+      packages: write   # push to ghcr.io
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Compute next version tag
+        id: tag
+        run: |
+          PREFIX=$(date +%Y.%m)
+          LAST=$(git tag -l "${PREFIX}.*" | sort -t. -k3 -n | tail -1)
+          if [ -z "$LAST" ]; then
+            NEXT="00"
+          else
+            N=$(echo "$LAST" | awk -F. '{print $3}')
+            NEXT=$(printf '%02d' $((10#$N + 1)))
+          fi
+          TAG="${PREFIX}.${NEXT}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Computed tag: ${TAG}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ steps.tag.outputs.tag }}
+            ghcr.io/${{ github.repository }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create and push git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "${{ steps.tag.outputs.tag }}"
+          git push origin "${{ steps.tag.outputs.tag }}"
