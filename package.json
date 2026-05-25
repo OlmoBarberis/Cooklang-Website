@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node scripts/sync-images.mjs && astro dev",
     "build": "astro build",
-    "start": "node scripts/sync-images.mjs && node dist/server/entry.mjs",
+    "start": "node scripts/sync-images.mjs && node --experimental-wasm-modules dist/server/entry.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },
