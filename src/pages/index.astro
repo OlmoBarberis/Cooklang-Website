@@ -16,7 +16,7 @@ const summaries = recipes.map((r) => ({
   image: r.image,
   category: r.category,
   ingredientCount: r.ingredients.length,
-  searchText: normalize(r.title + ' ' + r.tags.join(' ')),
+  searchText: normalize(r.title),
 }));
 
 const grouped: Record<string, typeof summaries> = {};
