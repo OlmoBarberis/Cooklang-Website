@@ -1,0 +1,480 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import StepText from '../../components/StepText.astro';
+import { getAllRecipes, getRecipeBySlug } from '../../lib/recipes';
+
+export function getStaticPaths() {
+  return getAllRecipes().map((r) => ({ params: { slug: r.slug } }));
+}
+
+const { slug } = Astro.params;
+const recipe = getRecipeBySlug(slug)!;
+
+const isExternalImage = recipe.image?.startsWith('http');
+const imageSrc = recipe.image
+  ? isExternalImage ? recipe.image : `/${recipe.image}`
+  : null;
+
+const hasIngredients = recipe.ingredients.length > 0;
+const hasSections = recipe.sections.some((s) => s.content.length > 0);
+---
+
+<BaseLayout title={recipe.title} image={imageSrc ?? undefined}>
+  <!-- Hero -->
+  {imageSrc && (
+    <div class="hero">
+      <img src={imageSrc} alt={recipe.title} />
+      <div class="hero-overlay" />
+    </div>
+  )}
+
+  <article class="recipe-page" class:list={{ 'no-hero': !imageSrc }}>
+    <a href="/" class="back-link">← Ricette</a>
+
+    <!-- Header -->
+    <header class="recipe-header">
+      {recipe.category && (
+        <span class="recipe-category">{recipe.category}</span>
+      )}
+      <h1 class="recipe-title">{recipe.title}</h1>
+
+      {recipe.tags.length > 0 && (
+        <div class="tag-list">
+          {recipe.tags.map((tag) => (
+            <a href={`/tag/${encodeURIComponent(tag)}`} class="tag">{tag}</a>
+          ))}
+        </div>
+      )}
+
+      <div class="recipe-meta">
+        {recipe.servings && (
+          <span class="meta-item">
+            <span aria-hidden="true">👥</span>
+            {recipe.servings} {parseInt(recipe.servings) === 1 ? 'porzione' : 'porzioni'}
+          </span>
+        )}
+        {recipe.source && (
+          <span class="meta-item">
+            <span aria-hidden="true">📖</span>
+            {recipe.source.startsWith('http') ? (
+              <a href={recipe.source} target="_blank" rel="noopener">Fonte</a>
+            ) : (
+              recipe.source
+            )}
+          </span>
+        )}
+      </div>
+    </header>
+
+    <!-- Body: ingredients + steps -->
+    <div class="recipe-body">
+      {hasIngredients && (
+        <aside class="ingredients-panel">
+          <h2 class="panel-title">Ingredienti</h2>
+
+          <div class="multiplier-bar" id="multiplier-bar">
+            <span class="mult-label">Dosi</span>
+            <div class="mult-btns">
+              {[0.5, 1, 2, 3].map((n) => (
+                <button
+                  class={`mult-btn${n === 1 ? ' active' : ''}`}
+                  data-mult={n}
+                  aria-pressed={n === 1 ? 'true' : 'false'}
+                >
+                  {n === 0.5 ? '½×' : `${n}×`}
+                </button>
+              ))}
+              <input
+                type="number"
+                id="mult-input"
+                class="mult-input"
+                value="1"
+                min="0.25"
+                max="20"
+                step="0.5"
+                aria-label="Moltiplicatore personalizzato"
+              />
+            </div>
+          </div>
+
+          <ul class="ingredient-list">
+            {recipe.ingredients.map((ing, i) => (
+              <li class="ingredient-item">
+                <label>
+                  <input type="checkbox" class="ing-check" id={`ing-${i}`} />
+                  <span class="ing-label">
+                    {ing.displayText && (
+                      <span
+                        class="ing-qty"
+                        data-base={typeof ing.quantity === 'number' ? ing.quantity : undefined}
+                        data-unit={ing.unit ?? ''}
+                      >{ing.displayText}</span>
+                    )}
+                    <span class="ing-name">{ing.name}</span>
+                  </span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )}
+
+      {hasSections && (
+        <div class="steps-panel">
+          {recipe.sections.map((section) => (
+            section.content.length > 0 && (
+              <section class="recipe-section">
+                {section.title && (
+                  <h3 class="section-title">{section.title}</h3>
+                )}
+                <div class="section-content">
+                  {section.content.map((item) => {
+                    if (item.type === 'note') {
+                      return <p class="step-note">{item.text}</p>;
+                    }
+                    return (
+                      <div class="step-item">
+                        <span class="step-num" aria-hidden="true">{item.step.number}</span>
+                        <StepText
+                          step={item.step}
+                          ingredients={recipe.ingredients}
+                          cookwares={recipe.cookwares}
+                          timers={recipe.timers}
+                          inlineQuantities={recipe.inlineQuantities}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )
+          ))}
+        </div>
+      )}
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .hero {
+    position: relative;
+    height: clamp(240px, 45vw, 520px);
+    overflow: hidden;
+    background: var(--color-tag-bg);
+  }
+  .hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 40%, rgba(28, 18, 8, 0.55));
+  }
+
+  .recipe-page {
+    max-width: var(--content-width);
+    margin: 0 auto;
+    padding: 1.5rem 1rem 5rem;
+  }
+  .recipe-page.no-hero { padding-top: 2rem; }
+
+  .back-link {
+    display: inline-block;
+    font-size: 0.875rem;
+    color: var(--color-muted);
+    margin-bottom: 1.25rem;
+  }
+  .back-link:hover { color: var(--color-accent); text-decoration: none; }
+
+  /* ── Header ── */
+  .recipe-header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 1.5rem;
+  }
+
+  .recipe-category {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .recipe-title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.75rem, 5vw, 2.75rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .recipe-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: var(--color-muted);
+  }
+  .meta-item { display: flex; align-items: center; gap: 0.35rem; }
+
+  /* ── Two-column layout ── */
+  .recipe-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    .recipe-page {
+      max-width: 960px;
+      padding: 2rem 2rem 5rem;
+    }
+    .recipe-body {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 3rem;
+    }
+  }
+
+  /* ── Ingredients ── */
+  .ingredients-panel {
+    flex: 0 0 220px;
+  }
+
+  @media (min-width: 768px) {
+    .ingredients-panel {
+      position: sticky;
+      top: 5rem;
+    }
+  }
+
+  .panel-title {
+    font-family: var(--font-serif);
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-accent);
+  }
+
+  /* ── Multiplier bar ── */
+  .multiplier-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .mult-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .mult-btns {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .mult-btn {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25em 0.55em;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    line-height: 1.6;
+  }
+  .mult-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+  .mult-btn.active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
+  }
+
+  .mult-input {
+    width: 3.75rem;
+    font-size: 0.8rem;
+    font-family: var(--font-sans);
+    padding: 0.25em 0.4em;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    text-align: center;
+    transition: border-color 0.15s;
+    /* hide spinner arrows */
+    -moz-appearance: textfield;
+  }
+  .mult-input::-webkit-outer-spin-button,
+  .mult-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .mult-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+
+  .ingredient-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .ingredient-item label {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    cursor: pointer;
+  }
+
+  .ing-check {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--color-accent);
+    cursor: pointer;
+    margin-top: 0.1em;
+  }
+
+  .ing-label {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    line-height: 1.4;
+    font-size: 0.9rem;
+    transition: opacity 0.15s;
+  }
+
+  .ingredient-item:has(.ing-check:checked) .ing-label {
+    opacity: 0.4;
+    text-decoration: line-through;
+  }
+
+  .ing-qty {
+    font-weight: 700;
+    color: var(--color-accent);
+    white-space: nowrap;
+  }
+  .ing-name { color: var(--color-text); }
+
+  /* ── Steps ── */
+  .steps-panel { flex: 1; min-width: 0; }
+
+  .recipe-section { margin-bottom: 2.5rem; }
+
+  .section-title {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    margin-bottom: 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .section-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .step-item {
+    display: grid;
+    grid-template-columns: 1.75rem 1fr;
+    gap: 0.75rem;
+  }
+
+  .step-num {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    line-height: 1.75;
+    text-align: right;
+  }
+</style>
+
+<script>
+  // ── Ingredient checkboxes ──────────────────────────────────────────────────
+  const key = `checked:${window.location.pathname}`;
+  const checks = document.querySelectorAll<HTMLInputElement>('.ing-check');
+  const saved: string[] = JSON.parse(sessionStorage.getItem(key) ?? '[]');
+  checks.forEach((el, i) => {
+    if (saved.includes(String(i))) el.checked = true;
+    el.addEventListener('change', () => {
+      const active = [...checks]
+        .map((c, idx) => (c.checked ? String(idx) : null))
+        .filter(Boolean) as string[];
+      sessionStorage.setItem(key, JSON.stringify(active));
+    });
+  });
+
+  // ── Quantity multiplier ────────────────────────────────────────────────────
+  const qtyEls = document.querySelectorAll<HTMLElement>('.ing-qty[data-base]');
+  const multBtns = document.querySelectorAll<HTMLButtonElement>('.mult-btn');
+  const multInput = document.getElementById('mult-input') as HTMLInputElement | null;
+
+  function formatQty(base: number, mult: number): string {
+    const val = base * mult;
+    // Round to max 2 decimal places, strip trailing zeros
+    return parseFloat(val.toFixed(2)).toString();
+  }
+
+  function applyMultiplier(mult: number) {
+    qtyEls.forEach((el) => {
+      const base = parseFloat(el.dataset.base!);
+      const unit = el.dataset.unit ?? '';
+      const display = formatQty(base, mult);
+      el.textContent = unit ? `${display} ${unit}` : display;
+    });
+  }
+
+  function setActive(mult: number) {
+    multBtns.forEach((btn) => {
+      const isMatch = parseFloat(btn.dataset.mult!) === mult;
+      btn.classList.toggle('active', isMatch);
+      btn.setAttribute('aria-pressed', String(isMatch));
+    });
+  }
+
+  multBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const mult = parseFloat(btn.dataset.mult!);
+      setActive(mult);
+      if (multInput) multInput.value = String(mult);
+      applyMultiplier(mult);
+    });
+  });
+
+  multInput?.addEventListener('input', () => {
+    const mult = parseFloat(multInput.value);
+    if (!isNaN(mult) && mult > 0) {
+      setActive(mult);
+      applyMultiplier(mult);
+    }
+  });
+</script>

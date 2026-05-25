@@ -1,0 +1,72 @@
+---
+import type { ParsedStep, FlatIngredient, FlatCookware, FlatTimer, FlatInlineQty } from '../lib/recipes';
+
+interface Props {
+  step: ParsedStep;
+  ingredients: FlatIngredient[];
+  cookwares: FlatCookware[];
+  timers: FlatTimer[];
+  inlineQuantities: FlatInlineQty[];
+}
+
+const { step, ingredients, cookwares, timers, inlineQuantities } = Astro.props;
+
+function renderStep(): string {
+  return step.items
+    .map((item) => {
+      switch (item.type) {
+        case 'text':
+          return item.value
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        case 'ingredient': {
+          const ing = ingredients[item.index];
+          if (!ing) return '';
+          const label = ing.displayText
+            ? `${ing.name} <span class="token-qty">(${ing.displayText})</span>`
+            : ing.name;
+          return `<span class="token-ingredient">${label}</span>`;
+        }
+        case 'cookware': {
+          const cw = cookwares[item.index];
+          return cw ? `<span class="token-cookware">${cw.name}</span>` : '';
+        }
+        case 'timer': {
+          const tm = timers[item.index];
+          return tm ? `<span class="token-timer">${tm.displayText}</span>` : '';
+        }
+        case 'inlineQuantity': {
+          const iq = inlineQuantities[item.index];
+          if (!iq) return '';
+          return `<span class="token-inline-qty">${iq.value}${iq.unit ? ' ' + iq.unit : ''}</span>`;
+        }
+        default:
+          return '';
+      }
+    })
+    .join('');
+}
+
+const html = renderStep();
+---
+
+<p class="step-text" set:html={html} />
+
+<style>
+  .step-text {
+    line-height: 1.75;
+    color: var(--color-text);
+  }
+
+  .step-text :global(.token-qty) {
+    font-weight: 400;
+    font-size: 0.875em;
+    opacity: 0.8;
+  }
+
+  .step-text :global(.token-inline-qty) {
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+</style>

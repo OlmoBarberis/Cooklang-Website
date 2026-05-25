@@ -1,0 +1,87 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import RecipeCard from '../components/RecipeCard.astro';
+import { getAllRecipes, getAllTags } from '../lib/recipes';
+
+const recipes = getAllRecipes();
+const tags = getAllTags();
+
+const summaries = recipes.map((r) => ({
+  slug: r.slug,
+  title: r.title,
+  tags: r.tags,
+  image: r.image,
+  category: r.category,
+  ingredientCount: r.ingredients.length,
+}));
+---
+
+<BaseLayout title="Le mie ricette">
+  <div class="page-wrap">
+    <!-- Tag filter bar -->
+    {tags.length > 0 && (
+      <nav class="tag-nav" aria-label="Filtra per categoria">
+        <a href="/" class="tag active-tag">Tutte</a>
+        {tags.map((tag) => (
+          <a href={`/tag/${encodeURIComponent(tag)}`} class="tag">{tag}</a>
+        ))}
+      </nav>
+    )}
+
+    <!-- Recipe count -->
+    <p class="count">{recipes.length} ricette</p>
+
+    <!-- Grid -->
+    <div class="recipe-grid">
+      {summaries.map((r) => <RecipeCard recipe={r} />)}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page-wrap {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 1.5rem 1rem 4rem;
+  }
+
+  .tag-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .active-tag {
+    background: var(--color-accent);
+    color: #fff;
+  }
+
+  .count {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .recipe-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .recipe-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .page-wrap {
+      padding: 2rem 2rem 5rem;
+    }
+    .recipe-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+  }
+</style>

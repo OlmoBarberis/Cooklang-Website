@@ -1,0 +1,123 @@
+---
+import type { RecipeSummary } from '../lib/recipes';
+
+interface Props {
+  recipe: RecipeSummary;
+}
+
+const { recipe } = Astro.props;
+const isExternalImage = recipe.image?.startsWith('http');
+---
+
+<a href={`/recipe/${recipe.slug}`} class="card">
+  <div class="card-image">
+    {recipe.image ? (
+      <img
+        src={isExternalImage ? recipe.image : `/${recipe.image}`}
+        alt={recipe.title}
+        loading="lazy"
+        decoding="async"
+      />
+    ) : (
+      <div class="card-placeholder" aria-hidden="true">
+        <span>🍽</span>
+      </div>
+    )}
+  </div>
+  <div class="card-body">
+    {recipe.category && (
+      <span class="card-category">{recipe.category}</span>
+    )}
+    <h2 class="card-title">{recipe.title}</h2>
+    {recipe.tags.length > 0 && (
+      <div class="card-tags">
+        {recipe.tags.slice(0, 3).map((tag) => (
+          <span class="tag">{tag}</span>
+        ))}
+      </div>
+    )}
+    <p class="card-meta">{recipe.ingredientCount} ingredienti</p>
+  </div>
+</a>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 0.2s, transform 0.2s;
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  .card:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+    text-decoration: none;
+  }
+
+  .card-image {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--color-tag-bg);
+  }
+  .card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+  }
+  .card:hover .card-image img {
+    transform: scale(1.04);
+  }
+
+  .card-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    opacity: 0.4;
+  }
+
+  .card-body {
+    padding: 1rem 1.125rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+  }
+
+  .card-category {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  .card-title {
+    font-family: var(--font-serif);
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-text);
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.15rem;
+  }
+
+  .card-meta {
+    margin-top: auto;
+    padding-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+  }
+</style>
