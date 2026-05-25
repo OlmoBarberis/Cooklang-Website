@@ -5,6 +5,10 @@ import { getAllRecipes } from '../lib/recipes';
 
 const recipes = getAllRecipes();
 
+function normalize(s: string) {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
 const summaries = recipes.map((r) => ({
   slug: r.slug,
   title: r.title,
@@ -12,6 +16,7 @@ const summaries = recipes.map((r) => ({
   image: r.image,
   category: r.category,
   ingredientCount: r.ingredients.length,
+  searchText: normalize(r.title + ' ' + r.tags.join(' ')),
 }));
 
 const grouped: Record<string, typeof summaries> = {};
@@ -35,11 +40,13 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
         aria-label="Cerca ricette"
         autocomplete="off"
       />
-      <nav class="alpha-nav" aria-label="Salta alla lettera">
-        {letters.map((l) => (
-          <button class="alpha-btn" data-letter={l}>{l}</button>
-        ))}
-      </nav>
+      <div class="alpha-nav-scroll">
+        <nav class="alpha-nav" aria-label="Salta alla lettera">
+          {letters.map((l) => (
+            <button class="alpha-btn" data-letter={l}>{l}</button>
+          ))}
+        </nav>
+      </div>
     </div>
 
     <p class="count" id="recipe-count">{summaries.length} ricette</p>
@@ -49,11 +56,7 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
         <h2 class="letter-heading">{letter}</h2>
         <div class="recipe-grid">
           {grouped[letter].map((r) => (
-            <div
-              class="card-wrap"
-              data-title={r.title.toLowerCase()}
-              data-tags={r.tags.join(' ').toLowerCase()}
-            >
+            <div class="card-wrap" data-search={r.searchText}>
               <RecipeCard recipe={r} />
             </div>
           ))}
@@ -80,16 +83,16 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
     z-index: 90;
     background: var(--color-bg);
     border-bottom: 1px solid var(--color-border);
-    padding: 0.75rem 0;
-    margin-bottom: 1.25rem;
+    padding: 1rem 0 1.25rem;
+    margin-bottom: 2rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.85rem;
   }
 
   .search-input {
     width: 100%;
-    padding: 0.6rem 0.9rem;
+    padding: 0.65rem 1rem;
     border: 1.5px solid var(--color-border);
     border-radius: var(--radius-md);
     font-family: var(--font-sans);
@@ -102,15 +105,19 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
   .search-input:focus { border-color: var(--color-accent); }
   .search-input::placeholder { color: var(--color-muted); }
 
-  /* ── Alphabet nav ── */
-  .alpha-nav {
-    display: flex;
-    gap: 0.25rem;
+  /* ── Alphabet nav — scrollable wrapper, centered inner ── */
+  .alpha-nav-scroll {
     overflow-x: auto;
     scrollbar-width: none;
-    padding-bottom: 2px;
   }
-  .alpha-nav::-webkit-scrollbar { display: none; }
+  .alpha-nav-scroll::-webkit-scrollbar { display: none; }
+
+  .alpha-nav {
+    display: flex;
+    gap: 0.3rem;
+    width: max-content;
+    margin: 0 auto;
+  }
 
   .alpha-btn {
     flex-shrink: 0;
@@ -144,13 +151,13 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
   .count {
     font-size: 0.85rem;
     color: var(--color-muted);
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
   }
 
   /* ── Letter sections ── */
   .letter-section {
-    margin-bottom: 2.5rem;
-    scroll-margin-top: 12rem;
+    margin-bottom: 3rem;
+    scroll-margin-top: 13rem;
   }
 
   .letter-heading {
@@ -159,8 +166,8 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
     font-weight: 700;
     color: var(--color-accent);
     line-height: 1;
-    margin-bottom: 1rem;
-    padding-bottom: 0.4rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
     border-bottom: 2px solid var(--color-border);
   }
 
@@ -196,11 +203,15 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
   @media (min-width: 1024px) {
     .page-wrap { padding: 0 2rem 5rem; }
     .recipe-grid { grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
-    .letter-section { scroll-margin-top: 13rem; }
+    .letter-section { scroll-margin-top: 14rem; }
   }
 </style>
 
 <script>
+  function normalize(s: string) {
+    return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+
   const searchInput = document.getElementById('recipe-search') as HTMLInputElement;
   const countEl = document.getElementById('recipe-count')!;
   const emptyState = document.getElementById('empty-state') as HTMLElement;
@@ -208,7 +219,7 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
   const alphaBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.alpha-btn'));
 
   function applyFilter(query: string) {
-    const q = query.trim().toLowerCase();
+    const q = normalize(query);
     let total = 0;
 
     for (const section of sections) {
@@ -216,9 +227,7 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
       let count = 0;
 
       for (const card of cards) {
-        const match = !q
-          || card.dataset.title!.includes(q)
-          || card.dataset.tags!.includes(q);
+        const match = !q || (card.dataset.search ?? '').includes(q);
         card.hidden = !match;
         if (match) count++;
       }
