@@ -182,6 +182,7 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
     display: flex;
     flex-direction: column;
   }
+  .card-wrap[hidden] { display: none; }
   .card-wrap :global(.card) { flex: 1; }
 
   /* ── Empty state ── */
