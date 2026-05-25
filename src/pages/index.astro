@@ -65,8 +65,12 @@ const summaries = recipes.map((r) => ({
 
   .recipe-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 1.25rem;
+  }
+
+  @media (min-width: 480px) {
+    .recipe-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
   @media (min-width: 640px) {
