@@ -462,7 +462,7 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
     });
   });
 
-  const qtyEls = document.querySelectorAll<HTMLElement>('.ing-qty[data-base]');
+  const qtyEls = document.querySelectorAll<HTMLElement>('[data-base]');
   const multBtns = document.querySelectorAll<HTMLButtonElement>('.mult-btn');
   const multInput = document.getElementById('mult-input') as HTMLInputElement | null;
 

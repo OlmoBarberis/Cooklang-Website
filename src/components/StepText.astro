@@ -23,10 +23,13 @@ function renderStep(): string {
         case 'ingredient': {
           const ing = ingredients[item.index];
           if (!ing) return '';
-          const label = ing.displayText
-            ? `${ing.name} <span class="token-qty">(${ing.displayText})</span>`
-            : ing.name;
-          return `<span class="token-ingredient">${label}</span>`;
+          if (ing.displayText) {
+            const attrs = typeof ing.quantity === 'number'
+              ? ` data-base="${ing.quantity}" data-unit="${ing.unit ?? ''}"`
+              : '';
+            return `<span class="token-ingredient">${ing.name} <span class="token-qty"${attrs}>(${ing.displayText})</span></span>`;
+          }
+          return `<span class="token-ingredient">${ing.name}</span>`;
         }
         case 'cookware': {
           const cw = cookwares[item.index];
@@ -39,7 +42,10 @@ function renderStep(): string {
         case 'inlineQuantity': {
           const iq = inlineQuantities[item.index];
           if (!iq) return '';
-          return `<span class="token-inline-qty">${iq.value}${iq.unit ? ' ' + iq.unit : ''}</span>`;
+          const attrs = typeof iq.value === 'number'
+            ? ` data-base="${iq.value}" data-unit="${iq.unit ?? ''}"`
+            : '';
+          return `<span class="token-inline-qty"${attrs}>${iq.value}${iq.unit ? ' ' + iq.unit : ''}</span>`;
         }
         default:
           return '';
