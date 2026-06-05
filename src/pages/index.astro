@@ -1,13 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import RecipeCard from '../components/RecipeCard.astro';
-import { getAllRecipes } from '../lib/recipes';
+import { getAllRecipes, getAllTags } from '../lib/recipes';
 
 const recipes = getAllRecipes();
-
-function normalize(s: string) {
-  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-}
+const allTags = getAllTags();
 
 const summaries = recipes.map((r) => ({
   slug: r.slug,
@@ -16,7 +13,6 @@ const summaries = recipes.map((r) => ({
   image: r.image,
   category: r.category,
   ingredientCount: r.ingredients.length,
-  searchText: normalize(r.title),
 }));
 
 const grouped: Record<string, typeof summaries> = {};
@@ -32,20 +28,23 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
   <div class="page-wrap">
 
     <div class="filter-bar">
-      <input
-        type="search"
-        id="recipe-search"
-        class="search-input"
-        placeholder="Cerca ricette…"
-        aria-label="Cerca ricette"
-        autocomplete="off"
-      />
+      <!-- Alphabet nav -->
       <div class="alpha-nav-scroll">
         <nav class="alpha-nav" aria-label="Salta alla lettera">
           {letters.map((l) => (
             <button class="alpha-btn" data-letter={l}>{l}</button>
           ))}
         </nav>
+      </div>
+
+      <!-- Tag filters -->
+      <div class="tag-nav-scroll">
+        <div class="tag-nav" role="group" aria-label="Filtra per categoria">
+          <button class="tag-filter tag-filter-all tag-active" data-tag="">Tutte</button>
+          {allTags.map((tag) => (
+            <button class="tag-filter" data-tag={tag}>{tag}</button>
+          ))}
+        </div>
       </div>
     </div>
 
@@ -56,7 +55,10 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
         <h2 class="letter-heading">{letter}</h2>
         <div class="recipe-grid">
           {grouped[letter].map((r) => (
-            <div class="card-wrap" data-search={r.searchText}>
+            <div
+              class="card-wrap"
+              data-tags={r.tags.join(',')}
+            >
               <RecipeCard recipe={r} />
             </div>
           ))}
@@ -79,34 +81,20 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
   /* ── Filter bar ── */
   .filter-bar {
     position: sticky;
-    top: 4rem; /* fallback; JS sets exact header height */
+    top: 4rem;
     z-index: 90;
     background: var(--color-bg);
-    border-bottom: 1px solid var(--color-border);
-    box-shadow: 0 4px 12px rgba(44, 24, 8, 0.06);
-    padding: 1.25rem 0 1.25rem;
+    /* break out of .page-wrap's padding */
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding: 1rem 1rem;
     margin-bottom: 2rem;
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
+    gap: 0.75rem;
   }
 
-  .search-input {
-    width: 100%;
-    padding: 0.65rem 1rem;
-    border: 1.5px solid var(--color-border);
-    border-radius: var(--radius-md);
-    font-family: var(--font-sans);
-    font-size: 0.95rem;
-    background: var(--color-surface);
-    color: var(--color-text);
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .search-input:focus { border-color: var(--color-accent); }
-  .search-input::placeholder { color: var(--color-muted); }
-
-  /* ── Alphabet nav — scrollable wrapper, centered inner ── */
+  /* ── Alphabet nav ── */
   .alpha-nav-scroll {
     overflow-x: auto;
     scrollbar-width: none;
@@ -115,37 +103,73 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
 
   .alpha-nav {
     display: flex;
-    gap: 0.3rem;
+    gap: 0.2rem;
     width: max-content;
     margin: 0 auto;
   }
 
   .alpha-btn {
     flex-shrink: 0;
-    font-size: 0.78rem;
-    font-weight: 700;
-    width: 2rem;
-    height: 2rem;
-    border: 1.5px solid var(--color-border);
-    border-radius: var(--radius-sm);
+    font-family: var(--font-serif);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border: none;
+    border-radius: 100px;
     background: transparent;
     color: var(--color-muted);
     cursor: pointer;
-    transition: border-color 0.15s, color 0.15s, background 0.15s, opacity 0.15s;
-    line-height: 1;
+    transition: background 0.15s, color 0.15s, opacity 0.15s;
+    line-height: 1.6;
   }
   .alpha-btn:hover:not(.alpha-disabled) {
-    border-color: var(--color-accent);
+    background: var(--color-tag-bg);
     color: var(--color-accent);
   }
   .alpha-btn.alpha-active {
     background: var(--color-accent);
-    border-color: var(--color-accent);
     color: #fff;
   }
   .alpha-btn.alpha-disabled {
-    opacity: 0.25;
+    opacity: 0.2;
     cursor: default;
+  }
+
+  /* ── Tag filter row ── */
+  .tag-nav-scroll {
+    /* no scroll — tags wrap */
+  }
+
+  .tag-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .tag-filter {
+    flex-shrink: 0;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.85rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: 100px;
+    background: transparent;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .tag-filter:hover:not(.tag-active) {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+  .tag-filter.tag-active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
   }
 
   /* ── Count ── */
@@ -158,7 +182,7 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
   /* ── Letter sections ── */
   .letter-section {
     margin-bottom: 3rem;
-    scroll-margin-top: 14rem; /* fallback; JS overrides with exact value */
+    scroll-margin-top: 14rem;
   }
 
   .letter-heading {
@@ -197,26 +221,22 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
   @media (min-width: 480px) {
     .recipe-grid { grid-template-columns: repeat(2, 1fr); }
   }
-
   @media (min-width: 640px) {
     .recipe-grid { grid-template-columns: repeat(3, 1fr); }
   }
-
   @media (min-width: 1024px) {
     .page-wrap { padding: 0 2rem 5rem; }
+    .filter-bar { margin-left: -2rem; margin-right: -2rem; padding-left: 2rem; padding-right: 2rem; }
     .recipe-grid { grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
-    /* scroll-margin-top handled by JS */
   }
 </style>
 
 <script>
-  function normalize(s: string) {
-    return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-  }
-
-  // Pin filter bar exactly below the site header, whatever its actual height is
+  // Pin filter bar exactly below site header
   const header = document.querySelector<HTMLElement>('.site-header');
   const filterBar = document.querySelector<HTMLElement>('.filter-bar');
+  const sections = Array.from(document.querySelectorAll<HTMLElement>('.letter-section'));
+
   if (header && filterBar) {
     const pin = () => {
       const h = header.offsetHeight;
@@ -231,14 +251,14 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
     new ResizeObserver(pin).observe(filterBar);
   }
 
-  const searchInput = document.getElementById('recipe-search') as HTMLInputElement;
   const countEl = document.getElementById('recipe-count')!;
   const emptyState = document.getElementById('empty-state') as HTMLElement;
-  const sections = Array.from(document.querySelectorAll<HTMLElement>('.letter-section'));
   const alphaBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.alpha-btn'));
+  const tagBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.tag-filter'));
 
-  function applyFilter(query: string) {
-    const q = normalize(query);
+  let activeTag = '';
+
+  function applyFilter() {
     let total = 0;
 
     for (const section of sections) {
@@ -246,7 +266,8 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
       let count = 0;
 
       for (const card of cards) {
-        const match = !q || (card.dataset.search ?? '').includes(q);
+        const tags = (card.dataset.tags ?? '').split(',').filter(Boolean);
+        const match = !activeTag || tags.includes(activeTag);
         card.hidden = !match;
         if (match) count++;
       }
@@ -264,10 +285,17 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
     emptyState.hidden = total > 0;
   }
 
-  searchInput.addEventListener('input', (e) =>
-    applyFilter((e.target as HTMLInputElement).value)
-  );
+  // Tag filter clicks
+  for (const btn of tagBtns) {
+    btn.addEventListener('click', () => {
+      activeTag = btn.dataset.tag ?? '';
+      tagBtns.forEach((b) => b.classList.remove('tag-active'));
+      btn.classList.add('tag-active');
+      applyFilter();
+    });
+  }
 
+  // Alphabet jump
   for (const btn of alphaBtns) {
     btn.addEventListener('click', () => {
       const letter = btn.dataset.letter!;
