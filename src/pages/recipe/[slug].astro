@@ -17,24 +17,30 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
 ---
 
 <BaseLayout title={recipe.title} image={imageSrc ?? undefined}>
-  <!-- Hero -->
-  {imageSrc && (
+
+  <!-- Full-bleed hero with title overlay -->
+  {imageSrc ? (
     <div class="hero">
       <img src={imageSrc} alt={recipe.title} />
-      <div class="hero-overlay" />
+      <div class="hero-scrim" />
+      <div class="hero-content">
+        <div class="hero-inner">
+          {recipe.category && <span class="recipe-category">{recipe.category}</span>}
+          <h1 class="recipe-title">{recipe.title}</h1>
+          {recipe.tags.length > 0 && (
+            <div class="tag-list">
+              {recipe.tags.map((tag) => (
+                <a href={`/tag/${encodeURIComponent(tag)}`} class="tag tag-hero">{tag}</a>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
-  )}
-
-  <article class="recipe-page" class:list={{ 'no-hero': !imageSrc }}>
-    <a href="/" class="back-link">← Ricette</a>
-
-    <!-- Header -->
-    <header class="recipe-header">
-      {recipe.category && (
-        <span class="recipe-category">{recipe.category}</span>
-      )}
+  ) : (
+    <div class="hero-text-only">
+      {recipe.category && <span class="recipe-category">{recipe.category}</span>}
       <h1 class="recipe-title">{recipe.title}</h1>
-
       {recipe.tags.length > 0 && (
         <div class="tag-list">
           {recipe.tags.map((tag) => (
@@ -42,7 +48,14 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
           ))}
         </div>
       )}
+    </div>
+  )}
 
+  <article class="recipe-page">
+    <a href="/" class="back-link">← Ricette</a>
+
+    <!-- Meta row (servings, source) -->
+    {(recipe.servings || recipe.source) && (
       <div class="recipe-meta">
         {recipe.servings && (
           <span class="meta-item">
@@ -61,7 +74,7 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
           </span>
         )}
       </div>
-    </header>
+    )}
 
     <!-- Body: ingredients + steps -->
     <div class="recipe-body">
@@ -69,7 +82,7 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
         <aside class="ingredients-panel">
           <h2 class="panel-title">Ingredienti</h2>
 
-          <div class="multiplier-bar" id="multiplier-bar">
+          <div class="multiplier-bar">
             <span class="mult-label">Dosi</span>
             <div class="mult-btns">
               {[0.5, 1, 2, 3].map((n) => (
@@ -153,9 +166,10 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
 </BaseLayout>
 
 <style>
+  /* ── Hero ── */
   .hero {
     position: relative;
-    height: clamp(240px, 45vw, 520px);
+    height: clamp(280px, 52vw, 560px);
     overflow: hidden;
     background: var(--color-tag-bg);
   }
@@ -164,66 +178,104 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
     height: 100%;
     object-fit: cover;
   }
-  .hero-overlay {
+  .hero-scrim {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, transparent 40%, rgba(28, 18, 8, 0.55));
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.08) 0%,
+      rgba(0,0,0,0.0) 35%,
+      rgba(0,0,0,0.65) 100%
+    );
   }
-
-  .recipe-page {
-    max-width: var(--content-width);
+  .hero-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+  }
+  .hero-inner {
+    width: 100%;
+    max-width: 960px;
     margin: 0 auto;
-    padding: 1.5rem 1rem 5rem;
-  }
-  .recipe-page.no-hero { padding-top: 2rem; }
-
-  .back-link {
-    display: inline-block;
-    font-size: 0.875rem;
-    color: var(--color-muted);
-    margin-bottom: 1.25rem;
-  }
-  .back-link:hover { color: var(--color-accent); text-decoration: none; }
-
-  /* ── Header ── */
-  .recipe-header {
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: 1.5rem;
+    padding: 1.5rem 1rem;
   }
 
   .recipe-category {
     display: block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-accent);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
   }
+  /* category color depends on context */
+  .hero-inner .recipe-category { color: rgba(255,255,255,0.75); }
+  .hero-text-only .recipe-category { color: var(--color-accent); }
 
   .recipe-title {
     font-family: var(--font-serif);
-    font-size: clamp(1.75rem, 5vw, 2.75rem);
-    font-weight: 700;
+    font-size: clamp(1.75rem, 5vw, 3rem);
+    font-weight: 400;
     line-height: 1.15;
     letter-spacing: -0.02em;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.6rem;
   }
+  .hero-inner .recipe-title { color: #fff; }
+  .hero-text-only .recipe-title { color: var(--color-text); }
 
   .tag-list {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
-    margin-bottom: 0.75rem;
   }
 
+  /* Tags over the hero image: semi-transparent dark pill */
+  .tag-hero {
+    background: rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.9);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.25);
+  }
+  .tag-hero:hover {
+    background: rgba(255,255,255,0.9);
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  /* ── Text-only header (no image) ── */
+  .hero-text-only {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2.5rem 1rem 0;
+  }
+
+  /* ── Article ── */
+  .recipe-page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1.25rem 1rem 5rem;
+  }
+
+  .back-link {
+    display: inline-block;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    margin-bottom: 1.25rem;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--color-accent); text-decoration: none; }
+
+  /* ── Meta row ── */
   .recipe-meta {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     color: var(--color-muted);
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
   }
   .meta-item { display: flex; align-items: center; gap: 0.35rem; }
 
@@ -235,21 +287,18 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
   }
 
   @media (min-width: 768px) {
-    .recipe-page {
-      max-width: 960px;
-      padding: 2rem 2rem 5rem;
-    }
+    .recipe-page { padding: 1.5rem 2rem 5rem; }
+    .hero-text-only { padding: 2.5rem 2rem 0; }
+    .hero-inner { padding: 2rem 2rem; }
     .recipe-body {
       flex-direction: row;
       align-items: flex-start;
-      gap: 3rem;
+      gap: 3.5rem;
     }
   }
 
-  /* ── Ingredients ── */
-  .ingredients-panel {
-    flex: 0 0 220px;
-  }
+  /* ── Ingredients panel ── */
+  .ingredients-panel { flex: 0 0 210px; }
 
   @media (min-width: 768px) {
     .ingredients-panel {
@@ -260,8 +309,8 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
 
   .panel-title {
     font-family: var(--font-serif);
-    font-size: 1.125rem;
-    font-weight: 600;
+    font-size: 1.1rem;
+    font-weight: 400;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 2px solid var(--color-accent);
@@ -278,9 +327,9 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
   }
 
   .mult-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
     color: var(--color-muted);
   }
@@ -293,9 +342,9 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
 
   .mult-btn {
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 600;
     padding: 0.25em 0.55em;
-    border: 1.5px solid var(--color-border);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--color-muted);
@@ -318,21 +367,17 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
     font-size: 0.8rem;
     font-family: var(--font-sans);
     padding: 0.25em 0.4em;
-    border: 1.5px solid var(--color-border);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     background: var(--color-bg);
     color: var(--color-text);
     text-align: center;
     transition: border-color 0.15s;
-    /* hide spinner arrows */
     -moz-appearance: textfield;
   }
   .mult-input::-webkit-outer-spin-button,
   .mult-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-  .mult-input:focus {
-    outline: none;
-    border-color: var(--color-accent);
-  }
+  .mult-input:focus { outline: none; border-color: var(--color-accent); }
 
   .ingredient-list {
     list-style: none;
@@ -367,12 +412,12 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
   }
 
   .ingredient-item:has(.ing-check:checked) .ing-label {
-    opacity: 0.4;
+    opacity: 0.35;
     text-decoration: line-through;
   }
 
   .ing-qty {
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-accent);
     white-space: nowrap;
   }
@@ -385,8 +430,8 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
 
   .section-title {
     font-family: var(--font-serif);
-    font-size: 1.15rem;
-    font-weight: 600;
+    font-size: 1.1rem;
+    font-weight: 400;
     color: var(--color-muted);
     margin-bottom: 1rem;
     padding-bottom: 0.4rem;
@@ -396,22 +441,24 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
   .section-content {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.1rem;
   }
 
   .step-item {
     display: grid;
     grid-template-columns: 1.75rem 1fr;
     gap: 0.75rem;
+    line-height: 1.7;
   }
 
   .step-num {
     font-family: var(--font-serif);
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 400;
     color: var(--color-accent);
     line-height: 1.75;
     text-align: right;
+    opacity: 0.7;
   }
 </style>
 
@@ -437,7 +484,6 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
 
   function formatQty(base: number, mult: number): string {
     const val = base * mult;
-    // Round to max 2 decimal places, strip trailing zeros
     return parseFloat(val.toFixed(2)).toString();
   }
 
@@ -445,8 +491,7 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
     qtyEls.forEach((el) => {
       const base = parseFloat(el.dataset.base!);
       const unit = el.dataset.unit ?? '';
-      const display = formatQty(base, mult);
-      el.textContent = unit ? `${display} ${unit}` : display;
+      el.textContent = unit ? `${formatQty(base, mult)} ${unit}` : formatQty(base, mult);
     });
   }
 

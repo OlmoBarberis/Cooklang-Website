@@ -20,7 +20,7 @@ const siteName = 'Le mie ricette';
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
       rel="stylesheet"
     />
   </head>
@@ -38,34 +38,60 @@ const siteName = 'Le mie ricette';
 </html>
 
 <style is:global>
-  /* ── Design tokens ── */
+  /* ── Design tokens: light ── */
   :root {
-    --color-bg:        #FAF7F2;
+    --color-bg:        #F6F6F5;
     --color-surface:   #FFFFFF;
-    --color-border:    #E8DDD0;
-    --color-text:      #1C1208;
-    --color-muted:     #7A6855;
-    --color-accent:    #C4622D;
-    --color-accent-dk: #9B4A1F;
-    --color-tag-bg:    #F2EAE0;
-    --color-tag-text:  #7A4A28;
+    --color-border:    #E3E2DF;
+    --color-text:      #1A1A18;
+    --color-muted:     #888680;
+    --color-accent:    #D4622A;
+    --color-accent-dk: #B3501F;
+    --color-tag-bg:    #ECEAE7;
+    --color-tag-text:  #6B5A4A;
 
-    --color-ingredient: #C4622D;
-    --color-cookware:   #5B7FA6;
-    --color-timer:      #4A8C6A;
+    --color-ingredient: #D4622A;
+    --color-cookware:   #4A7FA6;
+    --color-timer:      #3A8C5E;
 
-    --font-serif: 'Playfair Display', Georgia, serif;
-    --font-sans:  'Lato', system-ui, sans-serif;
+    --header-blur-bg: rgba(246, 246, 245, 0.88);
+
+    --font-serif: 'DM Serif Display', Georgia, serif;
+    --font-sans:  'Inter', system-ui, sans-serif;
 
     --radius-sm: 4px;
     --radius-md: 8px;
-    --radius-lg: 16px;
+    --radius-lg: 12px;
 
-    --shadow-card: 0 2px 8px rgba(44, 24, 8, 0.08);
-    --shadow-card-hover: 0 6px 24px rgba(44, 24, 8, 0.14);
+    --shadow-card: none;
+    --shadow-card-hover: 0 8px 32px rgba(24, 22, 15, 0.12);
 
     --max-width: 1200px;
     --content-width: 720px;
+  }
+
+  /* ── Design tokens: dark ── */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-bg:        #111110;
+      --color-surface:   #1C1B19;
+      --color-border:    #2E2C28;
+      --color-text:      #F0EDE8;
+      --color-muted:     #7A7268;
+      --color-accent:    #E8784A;
+      --color-accent-dk: #D4622A;
+      --color-tag-bg:    #252320;
+      --color-tag-text:  #D4A98A;
+
+      --color-ingredient: #E8784A;
+      --color-cookware:   #6A9FBF;
+      --color-timer:      #5AAF7A;
+
+      --header-blur-bg: rgba(17, 17, 16, 0.88);
+
+      --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.4);
+      --shadow-card-hover: 0 8px 40px rgba(0, 0, 0, 0.6);
+    }
   }
 
   /* ── Reset ── */
@@ -97,17 +123,23 @@ const siteName = 'Le mie ricette';
   /* ── Site header ── */
   .site-header {
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-surface);
     position: sticky;
     top: 0;
     z-index: 100;
+    transition: background 0.25s, backdrop-filter 0.25s, box-shadow 0.25s;
+  }
+
+  .site-header.scrolled {
+    background: var(--header-blur-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 1px 0 var(--color-border);
   }
 
   .site-title {
     font-family: var(--font-serif);
-    font-size: clamp(1.25rem, 4vw, 1.75rem);
-    font-weight: 700;
+    font-size: clamp(1.25rem, 4vw, 1.6rem);
+    font-weight: 400;
     color: var(--color-text);
     letter-spacing: -0.01em;
   }
@@ -118,7 +150,7 @@ const siteName = 'Le mie ricette';
     padding: 2rem 1.5rem;
     border-top: 1px solid var(--color-border);
     text-align: center;
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     color: var(--color-muted);
   }
   .site-footer a { color: var(--color-muted); }
@@ -129,15 +161,15 @@ const siteName = 'Le mie ricette';
     display: inline-block;
     background: var(--color-tag-bg);
     color: var(--color-tag-text);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    padding: 0.2em 0.65em;
+    padding: 0.2em 0.6em;
     border-radius: var(--radius-sm);
     white-space: nowrap;
     line-height: 1.8;
-    transition: background 0.15s;
+    transition: background 0.15s, color 0.15s;
   }
   a.tag:hover {
     background: var(--color-accent);
@@ -172,3 +204,12 @@ const siteName = 'Le mie ricette';
     border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   }
 </style>
+
+<script>
+  const header = document.querySelector('.site-header');
+  if (header) {
+    const toggle = () => header.classList.toggle('scrolled', window.scrollY > 8);
+    toggle();
+    window.addEventListener('scroll', toggle, { passive: true });
+  }
+</script>
