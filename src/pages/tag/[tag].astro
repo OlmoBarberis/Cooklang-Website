@@ -18,13 +18,19 @@ const summaries = recipes.map((r) => ({
 
 <BaseLayout title={tag}>
   <div class="page-wrap">
-    <a href="/" class="back-link">← Tutte le ricette</a>
-    <h1 class="page-title">{tag}</h1>
-    <p class="count">{recipes.length} {recipes.length === 1 ? 'ricetta' : 'ricette'}</p>
+
+    <div class="page-header">
+      <a href="/" class="back-link">← Tutte le ricette</a>
+      <div class="title-row">
+        <h1 class="page-title">{tag}</h1>
+        <span class="count">{recipes.length} {recipes.length === 1 ? 'ricetta' : 'ricette'}</span>
+      </div>
+    </div>
 
     <div class="recipe-grid">
       {summaries.map((r) => <RecipeCard recipe={r} />)}
     </div>
+
   </div>
 </BaseLayout>
 
@@ -32,45 +38,73 @@ const summaries = recipes.map((r) => ({
   .page-wrap {
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: 1.5rem 1rem 4rem;
+    padding: 0 1.5rem 4rem;
+  }
+
+  .page-header {
+    padding: 1.25rem 0;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--color-border-strong);
   }
 
   .back-link {
-    display: inline-block;
-    font-size: 0.85rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
     color: var(--color-muted);
+    display: block;
     margin-bottom: 1rem;
-    transition: color 0.15s;
+    transition: color 0.1s;
   }
-  .back-link:hover { color: var(--color-accent); text-decoration: none; }
+  .back-link:hover { color: var(--color-accent); }
+
+  .title-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
 
   .page-title {
-    font-family: var(--font-serif);
-    font-size: clamp(1.75rem, 5vw, 2.5rem);
-    font-weight: 400;
-    margin-bottom: 0.4rem;
+    font-size: clamp(1.75rem, 5vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
   }
 
   .count {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: var(--color-muted);
-    margin-bottom: 1.75rem;
+    white-space: nowrap;
   }
 
   .recipe-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--color-border);
+    border-left: 1px solid var(--color-border);
   }
 
-  @media (min-width: 480px) {
-    .recipe-grid { grid-template-columns: repeat(2, 1fr); }
+  .recipe-grid :global(.card) {
+    border-top: none;
+    border-left: none;
+    border-right: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
   }
+
   @media (min-width: 640px) {
     .recipe-grid { grid-template-columns: repeat(3, 1fr); }
   }
   @media (min-width: 1024px) {
-    .page-wrap { padding: 2rem 2rem 5rem; }
-    .recipe-grid { grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+    .recipe-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (min-width: 1280px) {
+    .recipe-grid { grid-template-columns: repeat(5, 1fr); }
   }
 </style>
