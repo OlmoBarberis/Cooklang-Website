@@ -65,7 +65,8 @@ export interface ParsedRecipe {
   servings?: string;
   source?: string;
   category?: string;
-  ingredients: FlatIngredient[];
+  ingredients: FlatIngredient[];        // original, index-ordered — used by StepText
+  sidebarIngredients: FlatIngredient[]; // merged by name+unit — used by the ingredient panel
   cookwares: FlatCookware[];
   timers: FlatTimer[];
   inlineQuantities: FlatInlineQty[];
@@ -114,6 +115,44 @@ function extractInlineQtyValue(raw: unknown): number | string {
   // Recurse one level for nested value
   if ('value' in obj) return extractInlineQtyValue(obj['value']);
   return '';
+}
+
+function mergeIngredients(ingredients: FlatIngredient[]): FlatIngredient[] {
+  // Group all occurrences by normalized name
+  const groups = new Map<string, FlatIngredient[]>();
+  for (const ing of ingredients) {
+    const key = ing.name.toLowerCase().trim();
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(ing);
+  }
+
+  const result: FlatIngredient[] = [];
+  for (const group of groups.values()) {
+    // Within each name group, sum entries that share the same unit
+    const byUnit = new Map<string, FlatIngredient>();
+    for (const ing of group) {
+      const unitKey = (ing.unit ?? '').toLowerCase().trim();
+      const existing = byUnit.get(unitKey);
+      if (existing && typeof existing.quantity === 'number' && typeof ing.quantity === 'number') {
+        const qty = parseFloat((existing.quantity + ing.quantity).toFixed(4));
+        byUnit.set(unitKey, {
+          ...existing,
+          quantity: qty,
+          displayText: existing.unit ? `${qty} ${existing.unit}` : String(qty),
+        });
+      } else if (!existing) {
+        byUnit.set(unitKey, ing);
+      }
+    }
+
+    const merged = Array.from(byUnit.values());
+    // If some entries have a real quantity/unit and others are bare (no unit, no qty),
+    // drop the bare ones — they're duplicate mentions without amounts.
+    const withQty = merged.filter((i) => i.quantity !== null && i.unit);
+    result.push(...(withQty.length > 0 && withQty.length < merged.length ? withQty : merged));
+  }
+
+  return result.sort((a, b) => a.name.localeCompare(b.name, 'it'));
 }
 
 const parser = new CooklangParser();
@@ -168,6 +207,7 @@ function parseFile(filePath: string, category?: string): ParsedRecipe | null {
       source: fm['source'] as string | undefined,
       category,
       ingredients,
+      sidebarIngredients: mergeIngredients(ingredients),
       cookwares,
       timers,
       inlineQuantities,

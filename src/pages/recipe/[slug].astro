@@ -12,7 +12,7 @@ const imageSrc = recipe.image
   ? isExternalImage ? recipe.image : `/${recipe.image}`
   : null;
 
-const hasIngredients = recipe.ingredients.length > 0;
+const hasIngredients = recipe.sidebarIngredients.length > 0;
 const hasSections = recipe.sections.some((s) => s.content.length > 0);
 ---
 
@@ -92,7 +92,7 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
           </div>
 
           <ul class="ingredient-list">
-            {recipe.ingredients.map((ing, i) => (
+            {recipe.sidebarIngredients.map((ing, i) => (
               <li class="ingredient-item">
                 <label>
                   <input type="checkbox" class="ing-check" id={`ing-${i}`} />
