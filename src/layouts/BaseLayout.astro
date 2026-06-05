@@ -23,10 +23,35 @@ const siteName = 'Le mie ricette';
       href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
       rel="stylesheet"
     />
+    <!-- Apply stored theme before first paint to avoid flash -->
+    <script is:inline>
+      (function () {
+        const stored = localStorage.getItem('theme');
+        if (stored) document.documentElement.dataset.theme = stored;
+      })();
+    </script>
   </head>
   <body>
     <header class="site-header">
       <a href="/" class="site-title">Le mie ricette</a>
+      <button id="theme-toggle" class="theme-toggle" aria-label="Cambia tema">
+        <!-- Sun (shown in dark mode) -->
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/>
+          <line x1="12" y1="2" x2="12" y2="4"/>
+          <line x1="12" y1="20" x2="12" y2="22"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="2" y1="12" x2="4" y2="12"/>
+          <line x1="20" y1="12" x2="22" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <!-- Moon (shown in light mode) -->
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
     </header>
     <main>
       <slot />
@@ -38,18 +63,19 @@ const siteName = 'Le mie ricette';
 </html>
 
 <style is:global>
+  /* ── Light tokens (default) ── */
   :root {
-    --color-bg:          #FFFFFF;
-    --color-surface:     #FFFFFF;
-    --color-surface-alt: #F5F5F5;
-    --color-border:      #E0E0E0;
+    --color-bg:            #FFFFFF;
+    --color-surface:       #FFFFFF;
+    --color-surface-alt:   #F5F5F5;
+    --color-border:        #E0E0E0;
     --color-border-strong: #111111;
-    --color-text:        #0A0A0A;
-    --color-muted:       #6B6B6B;
-    --color-accent:      #D4622A;
-    --color-accent-dk:   #B3501F;
-    --color-tag-bg:      #F0F0F0;
-    --color-tag-text:    #3A3A3A;
+    --color-text:          #0A0A0A;
+    --color-muted:         #6B6B6B;
+    --color-accent:        #D4622A;
+    --color-accent-dk:     #B3501F;
+    --color-tag-bg:        #F0F0F0;
+    --color-tag-text:      #3A3A3A;
 
     --color-ingredient: #D4622A;
     --color-cookware:   #3A6EA6;
@@ -67,6 +93,46 @@ const siteName = 'Le mie ricette';
 
     --max-width: 1280px;
     --content-width: 760px;
+  }
+
+  /* ── Dark tokens: OS preference (no manual override) ── */
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme="light"]) {
+      --color-bg:            #0E0E0E;
+      --color-surface:       #0E0E0E;
+      --color-surface-alt:   #1A1A1A;
+      --color-border:        #2A2A2A;
+      --color-border-strong: #F0F0F0;
+      --color-text:          #F0F0F0;
+      --color-muted:         #888888;
+      --color-accent:        #E8784A;
+      --color-accent-dk:     #D4622A;
+      --color-tag-bg:        #1A1A1A;
+      --color-tag-text:      #BBBBBB;
+
+      --color-ingredient: #E8784A;
+      --color-cookware:   #6A9FBF;
+      --color-timer:      #5AAF7A;
+    }
+  }
+
+  /* ── Dark tokens: manual override ── */
+  html[data-theme="dark"] {
+    --color-bg:            #0E0E0E;
+    --color-surface:       #0E0E0E;
+    --color-surface-alt:   #1A1A1A;
+    --color-border:        #2A2A2A;
+    --color-border-strong: #F0F0F0;
+    --color-text:          #F0F0F0;
+    --color-muted:         #888888;
+    --color-accent:        #E8784A;
+    --color-accent-dk:     #D4622A;
+    --color-tag-bg:        #1A1A1A;
+    --color-tag-text:      #BBBBBB;
+
+    --color-ingredient: #E8784A;
+    --color-cookware:   #6A9FBF;
+    --color-timer:      #5AAF7A;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -102,6 +168,9 @@ const siteName = 'Le mie ricette';
     position: sticky;
     top: 0;
     z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .site-title {
@@ -112,6 +181,44 @@ const siteName = 'Le mie ricette';
     color: var(--color-text);
   }
   .site-title:hover { color: var(--color-accent); }
+
+  /* ── Theme toggle ── */
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: border-color 0.1s, color 0.1s;
+    flex-shrink: 0;
+  }
+  .theme-toggle:hover {
+    border-color: var(--color-border-strong);
+    color: var(--color-text);
+  }
+
+  .theme-toggle svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* Show moon in light mode, sun in dark mode */
+  .icon-sun { display: none; }
+  .icon-moon { display: block; }
+
+  html[data-theme="dark"] .icon-sun,
+  html[data-theme="dark"] .icon-moon { display: none; }
+  html[data-theme="dark"] .icon-sun { display: block; }
+
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme="light"]) .icon-sun { display: block; }
+    html:not([data-theme="light"]) .icon-moon { display: none; }
+  }
 
   /* ── Footer ── */
   .site-footer {
@@ -173,3 +280,20 @@ const siteName = 'Le mie ricette';
     background: var(--color-surface-alt);
   }
 </style>
+
+<script>
+  const html = document.documentElement;
+  const btn = document.getElementById('theme-toggle');
+
+  function isDark(): boolean {
+    if (html.dataset.theme === 'dark') return true;
+    if (html.dataset.theme === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
+  btn?.addEventListener('click', () => {
+    const next = isDark() ? 'light' : 'dark';
+    html.dataset.theme = next;
+    localStorage.setItem('theme', next);
+  });
+</script>
