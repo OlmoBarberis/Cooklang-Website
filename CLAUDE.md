@@ -20,20 +20,22 @@ docker compose up -d   # preferred — uses docker-compose.yml
 
 ## Architecture
 
-**Framework:** Astro 5 in `output: 'server'` mode with the Node standalone adapter. Despite the "server" mode, the site is effectively pre-rendered from the local `recipes/` directory on each container start.
+**Framework:** Astro 5 in `output: 'server'` mode with the Node standalone adapter. Pages render on demand from the mounted `recipes/` directory. The parsed catalog is cached for the life of the production server process, so restart the container after changing recipes.
 
 **Recipe pipeline:** `src/lib/recipes.ts` is the single source of truth for all recipe data. It:
 1. Scans `recipes/` recursively — subdirectories become the `category` field on each recipe.
 2. Strips YAML frontmatter with `gray-matter`, then parses the remaining Cooklang content with `@cooklang/cooklang` (Rust/WASM).
 3. Flattens the WASM parser output into typed interfaces (`ParsedRecipe`, `RecipeSection`, `StepItem`, etc.) that all components consume.
-4. Exposes four functions used by Astro pages: `getAllRecipes()`, `getRecipeBySlug()`, `getAllTags()`, `getRecipesByTag()`.
+4. Exposes `getAllRecipes()`, `getRecipeBySlug()`, `getAllTags()`, `getRecipesByTag()`, and `toRecipeSummary()` for Astro pages.
 
-**Image handling:** `scripts/sync-images.mjs` copies `recipes/images/` → `public/images/` before dev/build so local image paths in frontmatter (`image: images/foo.jpg`) resolve correctly. This runs automatically via the `dev` and `start` npm scripts.
+**Search:** `src/pages/index.astro` embeds compact recipe summaries. `src/scripts/home-search.ts` builds a MiniSearch index in the browser for title, tag, category, and ingredient search. Tags use any-match filtering; selected ingredients must all be present. Filters are stored in URL query parameters.
+
+**Image handling:** `scripts/sync-images.mjs` copies `recipes/images/` into `public/images/` for development and `dist/client/images/` for the standalone server. This runs automatically via the `dev` and `start` npm scripts.
 
 **Slug generation:** `toSlug()` in `recipes.ts` strips accented characters (recipe names are often Italian) and converts to kebab-case. Slugs are derived from filenames, not frontmatter titles.
 
 **Pages:**
-- `src/pages/index.astro` — full recipe grid with tag navigation
+- `src/pages/index.astro` — recipe grid with MiniSearch text search, tag and ingredient filters
 - `src/pages/recipe/[slug].astro` — detail page: sticky ingredient sidebar + numbered steps; ingredient multiplier and checklist are client-side JS using `sessionStorage`
 - `src/pages/tag/[tag].astro` — tag-filtered grid
 

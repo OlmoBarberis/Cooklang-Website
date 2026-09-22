@@ -6,8 +6,8 @@ A mobile-first website that renders a personal [Cooklang](https://cooklang.org) 
 
 ## Features
 
-- **Warm editorial design** — Playfair Display headings, cream/terracotta palette, large hero images
-- **Recipe grid** — responsive 2→3→4 column layout with image cards
+- **Responsive design** — Inter typography, light and dark themes, and large recipe images
+- **Recipe grid** — responsive 2→3→4→5 column layout with image cards
 - **Search and filters** — MiniSearch searches recipe titles, tags, categories, and ingredients with prefix and typo matching. Select multiple tags (any match) and ingredients (all must match), and share the result URL.
 - **Ingredient multiplier** — scale quantities up or down with quick-select buttons (½×, 1×, 2×, 3×) or a custom value
 - **Interactive ingredient checklist** — check off ingredients as you cook; state persists across page reloads via `sessionStorage`
@@ -26,7 +26,7 @@ A mobile-first website that renders a personal [Cooklang](https://cooklang.org) 
 | Search | [MiniSearch](https://github.com/lucaong/minisearch) |
 | Cooklang parser | [`@cooklang/cooklang`](https://github.com/cooklang/cooklang-rs) v0.17 — Rust/WASM |
 | Frontmatter parser | [`gray-matter`](https://github.com/jonschlinkert/gray-matter) |
-| Fonts | Playfair Display + Lato via Google Fonts |
+| Fonts | Inter via Google Fonts |
 | Server | node:20-alpine — Astro standalone server (Docker) |
 | Language | TypeScript |
 
@@ -41,23 +41,26 @@ A mobile-first website that renders a personal [Cooklang](https://cooklang.org) 
 │   └── images/               # Local recipe images
 ├── src/
 │   ├── lib/
-│   │   └── recipes.ts        # Recipe parser — gray-matter + cooklang
+│   │   ├── recipes.ts        # Recipe parser and cached catalog
+│   │   └── search-normalize.ts # Accent and case normalization
 │   ├── layouts/
 │   │   └── BaseLayout.astro  # HTML shell, design tokens, global CSS
 │   ├── pages/
-│   │   ├── index.astro       # Homepage (recipe grid + tag nav)
+│   │   ├── index.astro       # Homepage (recipe grid + search filters)
 │   │   ├── recipe/
 │   │   │   └── [slug].astro  # Recipe detail page
 │   │   └── tag/
 │   │       └── [tag].astro   # Tag-filtered grid
-│   └── components/
+│   ├── components/
 │       ├── RecipeCard.astro  # Card used in grids
 │       └── StepText.astro    # Renders a step with inline token highlighting
+│   └── scripts/
+│       └── home-search.ts    # MiniSearch and URL-backed filters
 ├── scripts/
-│   └── sync-images.mjs       # Copies recipes/images/ → public/images/ at build time
+│   └── sync-images.mjs       # Copies mounted images before dev/start
 ├── public/
 │   └── images/               # Populated by sync-images.mjs (gitignored)
-├── Dockerfile                # node:20-alpine — installs deps, builds site at startup
+├── Dockerfile                # node:20-alpine — builds server image
 ├── docker-compose.yml        # Example Compose file
 ├── .dockerignore
 ├── astro.config.mjs
@@ -91,7 +94,7 @@ Supported frontmatter fields: `title`, `tags` / `tag` (string, comma-separated s
 
 ## Local development
 
-**Prerequisites:** Node.js 18+
+**Prerequisites:** Node.js 20+
 
 ```bash
 # Install dependencies
@@ -102,7 +105,9 @@ npm run dev
 # → http://localhost:4321
 ```
 
-The `sync-images.mjs` script copies `recipes/images/` into `public/images/` so local image references resolve correctly. It runs automatically before `dev` and `build`.
+The `sync-images.mjs` script copies `recipes/images/` into `public/images/` for development and `dist/client/images/` for the standalone server. It runs automatically before `dev` and `start`.
+
+The homepage builds a compact MiniSearch index in the browser from recipe titles, tags, categories, and ingredient names. Text search requires every query word; selected tags match any tag, while selected ingredients must all be present. Search state is stored in the URL. The recipe catalog is cached for the life of the production server process, so restart the server after changing `.cook` files.
 
 To preview the production build locally:
 
@@ -113,13 +118,13 @@ npm run preview
 
 ## Docker
 
-The `recipes/` folder is **not bundled into the image**. Instead it is mounted at runtime, and the site is built from it when the container starts. This means you can update your recipes without rebuilding the image — just restart the container.
+The `recipes/` folder is **not bundled into the image**. It is mounted at runtime. Astro serves pages on demand from the mounted collection; restart the container after changing recipes to refresh the production catalog. Rebuilding the image is only needed for application code changes.
 
 ### How it works
 
 ```
-docker build   → installs Node deps, copies source code (no recipes)
-docker run     → mounts ./recipes, runs `npm run build`, serves on port 4321
+docker build   → installs Node deps and builds the Astro server (no recipes)
+docker run     → mounts ./recipes, syncs images, serves on port 4321
 ```
 
 ### Running with Docker Compose (recommended)
@@ -144,10 +149,10 @@ Place your `recipes/` folder next to `docker-compose.yml`, then:
 docker compose pull
 docker compose up -d
 
-# View logs (includes the build output on first start)
+# View server logs
 docker compose logs -f
 
-# Apply recipe changes
+# Refresh the parsed catalog after recipe changes
 docker compose restart
 ```
 
@@ -186,6 +191,6 @@ A GitHub Actions workflow (`.github/workflows/docker-publish.yml`) handles this 
 1. Add or edit `.cook` files in your `recipes/` folder
 2. Put recipe images in `recipes/images/`
 3. Reference local images in frontmatter as `image: images/filename.jpg`
-4. Restart the container to rebuild the site: `docker compose restart`
+4. Restart the container to refresh the catalog: `docker compose restart`
 
 For live preview during editing, use the local dev server instead (see [Local development](#local-development)).
