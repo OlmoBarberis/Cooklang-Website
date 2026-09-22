@@ -446,6 +446,30 @@ const hasSections = recipe.sections.some((s) => s.content.length > 0);
     line-height: 1.75;
     text-align: right;
   }
+  .hero { height: clamp(230px, 45vw, 540px); border-bottom: 0; }
+  .recipe-wrap { padding-inline: clamp(1rem, 4vw, 3rem); }
+  .recipe-header-row { margin-bottom: 1.75rem; border-bottom: 0; }
+  .back-link { font-size: .85rem; text-transform: none; letter-spacing: 0; }
+  .recipe-header { padding-bottom: 2rem; border-bottom: 1px solid var(--color-border); }
+  .recipe-labels { gap: .5rem; margin-bottom: 1rem; }
+  .label { font-size: .72rem; letter-spacing: .01em; text-transform: none; border-radius: 999px; padding: .35em .85em; }
+  .label-link:hover { color: var(--color-surface); }
+  .recipe-title { max-width: 20ch; font-family: var(--font-serif); font-size: clamp(2.9rem, 8vw, 6rem); font-weight: 600; letter-spacing: -.04em; line-height: 1.04; }
+  .meta-key, .mult-label, .panel-title, .section-title { letter-spacing: .04em; }
+  .recipe-body { gap: 2rem; }
+  .ingredients-panel { flex-basis: 300px; padding: 1.25rem; background: var(--color-surface); border-radius: var(--radius-md); }
+  @media (min-width: 768px) { .ingredients-panel { top: 1.5rem; margin-right: 3rem; padding: 1.5rem; border: 0; } }
+  .panel-header { border-bottom: 1px solid var(--color-border); }
+  .panel-title { font-family: var(--font-serif); font-size: 1.7rem; font-weight: 600; text-transform: none; letter-spacing: -.02em; }
+  .mult-btn { min-width: 2.75rem; min-height: 2.75rem; border-radius: 999px; font-size: .85rem; }
+  .mult-btn.active { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-surface); }
+  .mult-input { min-height: 2.75rem; border-radius: var(--radius-sm); }
+  .ingredient-item label { padding: .7rem 0; }
+  .ing-label { font-size: .95rem; }
+  .section-title { font-family: var(--font-serif); font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 600; text-transform: none; letter-spacing: -.025em; color: var(--color-text); }
+  .step-item { grid-template-columns: 2.5rem minmax(0, 1fr); gap: .75rem; padding: 1.25rem 0; }
+  .step-num { width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 50%; background: var(--color-tag-bg); color: var(--color-tag-text); font-size: .8rem; text-align: center; line-height: 1; }
+  @media (max-width: 767px) { .recipe-header { margin-bottom: 1.5rem; } .recipe-body { gap: 2.5rem; } }
 </style>
 
 <script>

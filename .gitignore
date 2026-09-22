@@ -4,3 +4,10 @@ dist/
 public/images/
 .claude/
 recipes/
+
+# Local Impeccable sessions and generated review artifacts
+.impeccable/mocks/
+.impeccable/questions/
+.impeccable/review/
+.codex/
+.github/hooks/

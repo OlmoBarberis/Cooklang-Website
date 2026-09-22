@@ -20,7 +20,7 @@ const siteName = 'Le mie ricette';
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Literata:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
     <!-- Apply stored theme before first paint to avoid flash -->
@@ -63,76 +63,62 @@ const siteName = 'Le mie ricette';
 </html>
 
 <style is:global>
-  /* ── Light tokens (default) ── */
+  /* Editorial cookbook tokens */
   :root {
-    --color-bg:            #FFFFFF;
-    --color-surface:       #FFFFFF;
-    --color-surface-alt:   #F5F5F5;
-    --color-border:        #E0E0E0;
-    --color-border-strong: #111111;
-    --color-text:          #0A0A0A;
-    --color-muted:         #6B6B6B;
-    --color-accent:        #D4622A;
-    --color-accent-dk:     #B3501F;
-    --color-tag-bg:        #F0F0F0;
-    --color-tag-text:      #3A3A3A;
-
-    --color-ingredient: #D4622A;
-    --color-cookware:   #3A6EA6;
-    --color-timer:      #2E8B57;
-
-    --font-sans: 'Inter', system-ui, sans-serif;
-    --font-serif: 'Inter', system-ui, sans-serif;
-
-    --radius-sm: 2px;
-    --radius-md: 2px;
-    --radius-lg: 2px;
-
-    --shadow-card: none;
-    --shadow-card-hover: none;
-
-    --max-width: 1280px;
-    --content-width: 760px;
+    --color-bg: #f8f3ea;
+    --color-surface: #fffaf2;
+    --color-surface-alt: #f0e7d9;
+    --color-border: #d9cbbb;
+    --color-border-strong: #322b25;
+    --color-text: #29231f;
+    --color-muted: #685a50;
+    --color-accent: #a6402e;
+    --color-accent-dk: #863322;
+    --color-tag-bg: #eadccb;
+    --color-tag-text: #483a30;
+    --color-ingredient: #a6402e;
+    --color-cookware: #315d73;
+    --color-timer: #42704d;
+    --font-sans: 'DM Sans', system-ui, sans-serif;
+    --font-serif: 'Literata', Georgia, serif;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --max-width: 1320px;
   }
-
-  /* ── Dark tokens: OS preference (no manual override) ── */
   @media (prefers-color-scheme: dark) {
     html:not([data-theme="light"]) {
-      --color-bg:            #0E0E0E;
-      --color-surface:       #0E0E0E;
-      --color-surface-alt:   #1A1A1A;
-      --color-border:        #2A2A2A;
-      --color-border-strong: #CCCCCC;
-      --color-text:          #CCCCCC;
-      --color-muted:         #888888;
-      --color-accent:        #E8784A;
-      --color-accent-dk:     #D4622A;
-      --color-tag-bg:        #1A1A1A;
-      --color-tag-text:      #BBBBBB;
-
-      --color-ingredient: #E8784A;
-      --color-cookware:   #6A9FBF;
-      --color-timer:      #5AAF7A;
+      --color-bg: #201d1a;
+      --color-surface: #2b2622;
+      --color-surface-alt: #342d27;
+      --color-border: #53483e;
+      --color-border-strong: #e9ddcd;
+      --color-text: #f3eadf;
+      --color-muted: #c0ad9b;
+      --color-accent: #f09979;
+      --color-accent-dk: #f5ab8f;
+      --color-tag-bg: #43362f;
+      --color-tag-text: #f0ddc8;
+      --color-ingredient: #f09979;
+      --color-cookware: #90c5db;
+      --color-timer: #a0d4a1;
     }
   }
-
-  /* ── Dark tokens: manual override ── */
   html[data-theme="dark"] {
-    --color-bg:            #0E0E0E;
-    --color-surface:       #0E0E0E;
-    --color-surface-alt:   #1A1A1A;
-    --color-border:        #2A2A2A;
-    --color-border-strong: #F0F0F0;
-    --color-text:          #F0F0F0;
-    --color-muted:         #888888;
-    --color-accent:        #E8784A;
-    --color-accent-dk:     #D4622A;
-    --color-tag-bg:        #1A1A1A;
-    --color-tag-text:      #BBBBBB;
-
-    --color-ingredient: #E8784A;
-    --color-cookware:   #6A9FBF;
-    --color-timer:      #5AAF7A;
+    --color-bg: #201d1a;
+    --color-surface: #2b2622;
+    --color-surface-alt: #342d27;
+    --color-border: #53483e;
+    --color-border-strong: #e9ddcd;
+    --color-text: #f3eadf;
+    --color-muted: #c0ad9b;
+    --color-accent: #f09979;
+    --color-accent-dk: #f5ab8f;
+    --color-tag-bg: #43362f;
+    --color-tag-text: #f0ddc8;
+    --color-ingredient: #f09979;
+    --color-cookware: #90c5db;
+    --color-timer: #a0d4a1;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -272,13 +258,24 @@ const siteName = 'Le mie ricette';
 
   /* ── Step notes ── */
   .step-note {
-    border-left: 3px solid var(--color-accent);
+    border-left: 1px solid var(--color-accent);
     padding: 0.5rem 1rem;
     margin: 0.5rem 0;
     color: var(--color-muted);
     font-style: italic;
     background: var(--color-surface-alt);
   }
+
+  html { accent-color: var(--color-accent); }
+  ::selection { background: var(--color-accent); color: var(--color-surface); }
+  :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+  .site-header { position: relative; padding: 1rem clamp(1rem, 4vw, 3rem); border-bottom: 1px solid var(--color-border); }
+  .site-title { font-family: var(--font-serif); font-size: clamp(1.3rem, 3vw, 1.65rem); font-weight: 700; letter-spacing: -.03em; text-transform: none; }
+  .theme-toggle { width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--color-surface); }
+  .site-footer { padding: 2rem clamp(1rem, 4vw, 3rem); text-transform: none; letter-spacing: 0; font-size: .8rem; }
+  .tag { font-size: .7rem; letter-spacing: .03em; text-transform: none; border-radius: 999px; padding: .3em .8em; }
+  a.tag:hover { background: var(--color-accent); color: var(--color-surface); }
+  .step-note { border-left: 1px solid var(--color-accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 </style>
 
 <script>

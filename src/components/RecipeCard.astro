@@ -125,4 +125,12 @@ const isExternalImage = recipe.image?.startsWith('http');
     letter-spacing: -0.01em;
     color: var(--color-text);
   }
+  .card { border: 0; border-radius: var(--radius-md); overflow: hidden; background: var(--color-surface); box-shadow: 0 1px 2px #21160b12, 0 8px 22px #21160b0a; transition: transform .2s ease, box-shadow .2s ease; }
+  .card:hover { border-color: transparent; transform: translateY(-3px); box-shadow: 0 5px 12px #21160b16, 0 18px 36px #21160b10; }
+  .card:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+  .card-image { aspect-ratio: 4 / 3; border-bottom: 0; }
+  .card-body { padding: 1rem 1rem 1.25rem; gap: .5rem; }
+  .card-meta { font-size: .72rem; font-weight: 600; letter-spacing: .02em; text-transform: none; }
+  .card-title { font-family: var(--font-serif); font-size: clamp(1.3rem, 2vw, 1.65rem); font-weight: 600; line-height: 1.18; letter-spacing: -.025em; }
+  @media (prefers-reduced-motion: reduce) { .card, .card-image img { transition: none; } }
 </style>

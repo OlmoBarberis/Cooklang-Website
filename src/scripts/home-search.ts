@@ -135,15 +135,3 @@ for (const button of alphaButtons) button.addEventListener('click', () => {
 });
 window.addEventListener('popstate', fromUrl);
 fromUrl();
-
-const header = document.querySelector<HTMLElement>('.site-header');
-const filterBar = document.querySelector<HTMLElement>('.filter-bar');
-if (header && filterBar) {
-  const pin = () => {
-    filterBar.style.top = `${header.offsetHeight}px`;
-    for (const section of sections) section.style.scrollMarginTop = `${header.offsetHeight + filterBar.offsetHeight + 16}px`;
-  };
-  pin();
-  new ResizeObserver(pin).observe(header);
-  new ResizeObserver(pin).observe(filterBar);
-}

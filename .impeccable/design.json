@@ -1,0 +1,457 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-22T14:01:49.153654+00:00",
+  "title": "Design System: Le mie ricette",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#f8f3ea",
+        "tonalRamp": [
+          "oklch(15% 0.01 65)",
+          "oklch(26% 0.01 65)",
+          "oklch(38% 0.01 65)",
+          "oklch(50% 0.01 65)",
+          "oklch(62% 0.01 65)",
+          "oklch(74% 0.01 65)",
+          "oklch(85% 0.01 65)",
+          "oklch(95% 0.01 65)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "#fffaf2",
+        "tonalRamp": [
+          "oklch(15% 0.01 65)",
+          "oklch(26% 0.01 65)",
+          "oklch(38% 0.01 65)",
+          "oklch(50% 0.01 65)",
+          "oklch(62% 0.01 65)",
+          "oklch(74% 0.01 65)",
+          "oklch(85% 0.01 65)",
+          "oklch(95% 0.01 65)"
+        ]
+      },
+      "inset": {
+        "role": "neutral",
+        "displayName": "Inset",
+        "canonical": "#f0e7d9",
+        "tonalRamp": [
+          "oklch(15% 0.01 65)",
+          "oklch(26% 0.01 65)",
+          "oklch(38% 0.01 65)",
+          "oklch(50% 0.01 65)",
+          "oklch(62% 0.01 65)",
+          "oklch(74% 0.01 65)",
+          "oklch(85% 0.01 65)",
+          "oklch(95% 0.01 65)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "canonical": "#d9cbbb",
+        "tonalRamp": [
+          "oklch(15% 0.01 65)",
+          "oklch(26% 0.01 65)",
+          "oklch(38% 0.01 65)",
+          "oklch(50% 0.01 65)",
+          "oklch(62% 0.01 65)",
+          "oklch(74% 0.01 65)",
+          "oklch(85% 0.01 65)",
+          "oklch(95% 0.01 65)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#29231f",
+        "tonalRamp": [
+          "oklch(15% 0.01 65)",
+          "oklch(26% 0.01 65)",
+          "oklch(38% 0.01 65)",
+          "oklch(50% 0.01 65)",
+          "oklch(62% 0.01 65)",
+          "oklch(74% 0.01 65)",
+          "oklch(85% 0.01 65)",
+          "oklch(95% 0.01 65)"
+        ]
+      },
+      "muted-ink": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "#685a50",
+        "tonalRamp": [
+          "oklch(15% 0.01 65)",
+          "oklch(26% 0.01 65)",
+          "oklch(38% 0.01 65)",
+          "oklch(50% 0.01 65)",
+          "oklch(62% 0.01 65)",
+          "oklch(74% 0.01 65)",
+          "oklch(85% 0.01 65)",
+          "oklch(95% 0.01 65)"
+        ]
+      },
+      "tomato": {
+        "role": "primary",
+        "displayName": "Tomato",
+        "canonical": "#a6402e",
+        "tonalRamp": [
+          "oklch(15% 0.14 28)",
+          "oklch(26% 0.14 28)",
+          "oklch(38% 0.14 28)",
+          "oklch(50% 0.14 28)",
+          "oklch(62% 0.14 28)",
+          "oklch(74% 0.14 28)",
+          "oklch(85% 0.14 28)",
+          "oklch(95% 0.14 28)"
+        ]
+      },
+      "tomato-deep": {
+        "role": "primary",
+        "displayName": "Tomato Deep",
+        "canonical": "#863322",
+        "tonalRamp": [
+          "oklch(15% 0.14 28)",
+          "oklch(26% 0.14 28)",
+          "oklch(38% 0.14 28)",
+          "oklch(50% 0.14 28)",
+          "oklch(62% 0.14 28)",
+          "oklch(74% 0.14 28)",
+          "oklch(85% 0.14 28)",
+          "oklch(95% 0.14 28)"
+        ]
+      },
+      "label": {
+        "role": "neutral",
+        "displayName": "Label",
+        "canonical": "#eadccb",
+        "tonalRamp": [
+          "oklch(15% 0.01 65)",
+          "oklch(26% 0.01 65)",
+          "oklch(38% 0.01 65)",
+          "oklch(50% 0.01 65)",
+          "oklch(62% 0.01 65)",
+          "oklch(74% 0.01 65)",
+          "oklch(85% 0.01 65)",
+          "oklch(95% 0.01 65)"
+        ]
+      },
+      "blue": {
+        "role": "secondary",
+        "displayName": "Blue",
+        "canonical": "#315d73",
+        "tonalRamp": [
+          "oklch(15% 0.07 230)",
+          "oklch(26% 0.07 230)",
+          "oklch(38% 0.07 230)",
+          "oklch(50% 0.07 230)",
+          "oklch(62% 0.07 230)",
+          "oklch(74% 0.07 230)",
+          "oklch(85% 0.07 230)",
+          "oklch(95% 0.07 230)"
+        ]
+      },
+      "green": {
+        "role": "tertiary",
+        "displayName": "Green",
+        "canonical": "#42704d",
+        "tonalRamp": [
+          "oklch(15% 0.08 145)",
+          "oklch(26% 0.08 145)",
+          "oklch(38% 0.08 145)",
+          "oklch(50% 0.08 145)",
+          "oklch(62% 0.08 145)",
+          "oklch(74% 0.08 145)",
+          "oklch(85% 0.08 145)",
+          "oklch(95% 0.08 145)"
+        ]
+      },
+      "night": {
+        "role": "neutral",
+        "displayName": "Night",
+        "canonical": "#201d1a",
+        "tonalRamp": [
+          "oklch(15% 0.01 65)",
+          "oklch(26% 0.01 65)",
+          "oklch(38% 0.01 65)",
+          "oklch(50% 0.01 65)",
+          "oklch(62% 0.01 65)",
+          "oklch(74% 0.01 65)",
+          "oklch(85% 0.01 65)",
+          "oklch(95% 0.01 65)"
+        ]
+      },
+      "night-surface": {
+        "role": "neutral",
+        "displayName": "Night Surface",
+        "canonical": "#2b2622",
+        "tonalRamp": [
+          "oklch(15% 0.01 65)",
+          "oklch(26% 0.01 65)",
+          "oklch(38% 0.01 65)",
+          "oklch(50% 0.01 65)",
+          "oklch(62% 0.01 65)",
+          "oklch(74% 0.01 65)",
+          "oklch(85% 0.01 65)",
+          "oklch(95% 0.01 65)"
+        ]
+      },
+      "night-inset": {
+        "role": "neutral",
+        "displayName": "Night Inset",
+        "canonical": "#342d27",
+        "tonalRamp": [
+          "oklch(15% 0.01 65)",
+          "oklch(26% 0.01 65)",
+          "oklch(38% 0.01 65)",
+          "oklch(50% 0.01 65)",
+          "oklch(62% 0.01 65)",
+          "oklch(74% 0.01 65)",
+          "oklch(85% 0.01 65)",
+          "oklch(95% 0.01 65)"
+        ]
+      },
+      "night-line": {
+        "role": "neutral",
+        "displayName": "Night Line",
+        "canonical": "#53483e",
+        "tonalRamp": [
+          "oklch(15% 0.01 65)",
+          "oklch(26% 0.01 65)",
+          "oklch(38% 0.01 65)",
+          "oklch(50% 0.01 65)",
+          "oklch(62% 0.01 65)",
+          "oklch(74% 0.01 65)",
+          "oklch(85% 0.01 65)",
+          "oklch(95% 0.01 65)"
+        ]
+      },
+      "night-ink": {
+        "role": "neutral",
+        "displayName": "Night Ink",
+        "canonical": "#f3eadf",
+        "tonalRamp": [
+          "oklch(15% 0.01 65)",
+          "oklch(26% 0.01 65)",
+          "oklch(38% 0.01 65)",
+          "oklch(50% 0.01 65)",
+          "oklch(62% 0.01 65)",
+          "oklch(74% 0.01 65)",
+          "oklch(85% 0.01 65)",
+          "oklch(95% 0.01 65)"
+        ]
+      },
+      "night-muted": {
+        "role": "neutral",
+        "displayName": "Night Muted",
+        "canonical": "#c0ad9b",
+        "tonalRamp": [
+          "oklch(15% 0.01 65)",
+          "oklch(26% 0.01 65)",
+          "oklch(38% 0.01 65)",
+          "oklch(50% 0.01 65)",
+          "oklch(62% 0.01 65)",
+          "oklch(74% 0.01 65)",
+          "oklch(85% 0.01 65)",
+          "oklch(95% 0.01 65)"
+        ]
+      },
+      "night-tomato": {
+        "role": "primary",
+        "displayName": "Night Tomato",
+        "canonical": "#f09979",
+        "tonalRamp": [
+          "oklch(15% 0.14 28)",
+          "oklch(26% 0.14 28)",
+          "oklch(38% 0.14 28)",
+          "oklch(50% 0.14 28)",
+          "oklch(62% 0.14 28)",
+          "oklch(74% 0.14 28)",
+          "oklch(85% 0.14 28)",
+          "oklch(95% 0.14 28)"
+        ]
+      },
+      "night-blue": {
+        "role": "secondary",
+        "displayName": "Night Blue",
+        "canonical": "#90c5db",
+        "tonalRamp": [
+          "oklch(15% 0.07 230)",
+          "oklch(26% 0.07 230)",
+          "oklch(38% 0.07 230)",
+          "oklch(50% 0.07 230)",
+          "oklch(62% 0.07 230)",
+          "oklch(74% 0.07 230)",
+          "oklch(85% 0.07 230)",
+          "oklch(95% 0.07 230)"
+        ]
+      },
+      "night-green": {
+        "role": "tertiary",
+        "displayName": "Night Green",
+        "canonical": "#a0d4a1",
+        "tonalRamp": [
+          "oklch(15% 0.08 145)",
+          "oklch(26% 0.08 145)",
+          "oklch(38% 0.08 145)",
+          "oklch(50% 0.08 145)",
+          "oklch(62% 0.08 145)",
+          "oklch(74% 0.08 145)",
+          "oklch(85% 0.08 145)",
+          "oklch(95% 0.08 145)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Index heading"
+      },
+      "recipe-title": {
+        "displayName": "Recipe Title",
+        "purpose": "Recipe detail heading"
+      },
+      "card-title": {
+        "displayName": "Card Title",
+        "purpose": "Recipe card names"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Instructions and longer copy"
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Controls and metadata"
+      }
+    },
+    "shadows": [
+      {
+        "name": "recipe-card",
+        "value": "0 1px 2px #21160b12, 0 8px 22px #21160b0a",
+        "purpose": "Soft depth for linked recipe cards."
+      },
+      {
+        "name": "filter-popover",
+        "value": "0 12px 30px #1f160f20",
+        "purpose": "Separates floating filter menus."
+      }
+    ],
+    "motion": [
+      {
+        "name": "recipe-card-hover",
+        "value": "0.2s ease",
+        "purpose": "Small lift on pointer hover."
+      },
+      {
+        "name": "recipe-image-hover",
+        "value": "0.5s ease",
+        "purpose": "Subtle image scale on pointer hover."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "cards-two",
+        "value": "640px"
+      },
+      {
+        "name": "recipe-columns",
+        "value": "768px"
+      },
+      {
+        "name": "cards-three",
+        "value": "1024px"
+      },
+      {
+        "name": "cards-four",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Recipe Search",
+      "kind": "input",
+      "refersTo": "search-input",
+      "description": "Large touch-friendly search field.",
+      "html": "<input class=\"ds-search\" type=\"search\" placeholder=\"Cerca una ricetta, un ingrediente…\" aria-label=\"Cerca ricette\">",
+      "css": ".ds-search{width:100%;min-height:3.5rem;padding:.8rem 1.2rem;border:1px solid var(--color-border-strong);border-radius:var(--radius-md);background:var(--color-surface);color:var(--color-text);font:1rem \"DM Sans\",system-ui,sans-serif}.ds-search:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px}"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "filter-chip",
+      "description": "Rounded menu control for recipe filters.",
+      "html": "<button class=\"ds-filter\">Ingredienti ▾</button>",
+      "css": ".ds-filter{padding:.55rem .9rem;border:1px solid var(--color-border);border-radius:999px;background:var(--color-surface);color:var(--color-text);font:600 .8rem \"DM Sans\",system-ui,sans-serif;cursor:pointer}.ds-filter:hover,.ds-filter:focus-visible{border-color:var(--color-accent);outline-color:var(--color-accent)}"
+    },
+    {
+      "name": "Recipe Card",
+      "kind": "card",
+      "refersTo": "recipe-card",
+      "description": "Photo-led card with serif recipe title.",
+      "html": "<a class=\"ds-card\" href=\"#\"><div class=\"ds-photo\">Ricetta</div><div class=\"ds-card-body\"><small>Essiccatore · Snack</small><strong>Barrette di cereali con frutta secca</strong></div></a>",
+      "css": ".ds-card{display:block;overflow:hidden;border-radius:var(--radius-md);background:var(--color-surface);color:var(--color-text);text-decoration:none;box-shadow:0 1px 2px #21160b12,0 8px 22px #21160b0a;transition:transform .2s ease,box-shadow .2s ease}.ds-card:hover{transform:translateY(-3px);box-shadow:0 5px 12px #21160b16,0 18px 36px #21160b10}.ds-card:focus-visible{outline:2px solid var(--color-accent);outline-offset:3px}.ds-photo{aspect-ratio:4/3;display:grid;place-items:center;background:var(--color-surface-alt);color:var(--color-muted)}.ds-card-body{display:grid;gap:.5rem;padding:1rem 1rem 1.25rem}.ds-card-body small{font:600 .72rem \"DM Sans\",system-ui,sans-serif;color:var(--color-muted)}.ds-card-body strong{font:600 1.5rem/1.18 Literata,Georgia,serif;letter-spacing:-.025em}"
+    },
+    {
+      "name": "Site Navigation",
+      "kind": "nav",
+      "description": "Simple cookbook wordmark with theme control.",
+      "html": "<nav class=\"ds-nav\"><a href=\"#\">Le mie ricette</a><button aria-label=\"Cambia tema\">◐</button></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid var(--color-border);background:var(--color-bg)}.ds-nav a{font:700 1.5rem Literata,Georgia,serif;letter-spacing:-.03em;color:var(--color-text);text-decoration:none}.ds-nav a:hover,.ds-nav a:focus-visible{color:var(--color-accent)}.ds-nav button{width:2.5rem;height:2.5rem;border:1px solid var(--color-border);border-radius:50%;background:var(--color-surface);color:var(--color-text)}"
+    },
+    {
+      "name": "Serving Choice",
+      "kind": "button",
+      "description": "Circular serving multiplier control.",
+      "html": "<button class=\"ds-serving\">2×</button>",
+      "css": ".ds-serving{min-width:2.25rem;min-height:2.25rem;border:1px solid var(--color-border);border-radius:999px;background:transparent;color:var(--color-text);font:700 .78rem \"DM Sans\",system-ui,sans-serif;cursor:pointer}.ds-serving:hover,.ds-serving:focus-visible{border-color:var(--color-accent);color:var(--color-accent)}"
+    },
+    {
+      "name": "Ingredient Checklist",
+      "kind": "custom",
+      "description": "Ingredient item with a clear quantity and check state.",
+      "html": "<label class=\"ds-ingredient\"><input type=\"checkbox\"><span><strong>200 g</strong> farina</span></label>",
+      "css": ".ds-ingredient{display:flex;gap:.65rem;align-items:center;padding:.7rem 0;border-bottom:1px solid var(--color-border);color:var(--color-text);font:.95rem \"DM Sans\",system-ui,sans-serif}.ds-ingredient input{accent-color:var(--color-accent)}.ds-ingredient:has(input:checked) span{opacity:.4;text-decoration:line-through}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Open Cookbook",
+    "overview": "An editorial recipe blog with the practical structure of a cookbook archive. The interface opens with the collection and search, then lets real recipe images and names carry the page. It is warm and lightly playful through type, rounded details, and tactile controls, while remaining calm enough to use during cooking. The mobile view is the primary composition. There is no slogan, profile image, or invented editorial copy.",
+    "keyCharacteristics": [
+      "Large Literata headings and clean DM Sans utility text.",
+      "Warm paper surfaces with tomato accents and food photography.",
+      "Single-column mobile recipe browsing that expands into a measured grid.",
+      "Dark theme with the same hierarchy and warmer high-contrast colors."
+    ],
+    "rules": [
+      {
+        "name": "The Recipe Color Rule",
+        "body": "Tomato marks actions and ingredients; blue and green retain their meaning inside recipe steps.",
+        "section": "colors"
+      },
+      {
+        "name": "The Reading Rule",
+        "body": "Use the serif for names and headings, and the sans-serif for actions and cooking instructions.",
+        "section": "typography"
+      },
+      {
+        "name": "The Quiet Depth Rule",
+        "body": "Shadows distinguish interactive recipe cards and floating menus; they do not create nested card stacks.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep search immediately findable on phones.",
+      "Do let real recipe titles and food imagery provide the editorial content.",
+      "Do preserve readable quantities, checkboxes, and steps during cooking."
+    ],
+    "donts": [
+      "Don't add a slogan, personal portrait, or invented claims.",
+      "Don't make visual effects delay search or recipe reading.",
+      "Don't use the serif for dense cooking instructions or filter lists."
+    ]
+  }
+}
