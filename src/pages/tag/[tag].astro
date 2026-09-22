@@ -9,11 +9,10 @@ if (recipes.length === 0) return new Response(null, { status: 404 });
 const summaries = recipes.map(toRecipeSummary);
 ---
 
-<BaseLayout title={tag}>
+<BaseLayout title={tag} back="/" backLabel="Tutte le ricette">
   <div class="page-wrap">
 
     <div class="page-header">
-      <a href="/" class="back-link">← Tutte le ricette</a>
       <div class="title-row">
         <h1 class="page-title">{tag}</h1>
         <span class="count">{recipes.length} {recipes.length === 1 ? 'ricetta' : 'ricette'}</span>
@@ -39,18 +38,6 @@ const summaries = recipes.map(toRecipeSummary);
     margin-bottom: 2rem;
     border-bottom: 2px solid var(--color-border-strong);
   }
-
-  .back-link {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--color-muted);
-    display: block;
-    margin-bottom: 1rem;
-    transition: color 0.1s;
-  }
-  .back-link:hover { color: var(--color-accent); }
 
   .title-row {
     display: flex;
@@ -96,17 +83,12 @@ const summaries = recipes.map(toRecipeSummary);
   @media (min-width: 1024px) {
     .recipe-grid { grid-template-columns: repeat(4, 1fr); }
   }
-  @media (min-width: 1280px) {
-    .recipe-grid { grid-template-columns: repeat(5, 1fr); }
-  }
   .page-wrap { padding-inline: clamp(1rem, 4vw, 3rem); }
-  .page-header { padding: 2rem 0 1.5rem; border-bottom: 1px solid var(--color-border); }
-  .back-link { text-transform: none; letter-spacing: 0; font-size: .85rem; }
-  .page-title { font-family: var(--font-serif); font-size: clamp(2.8rem, 9vw, 5.5rem); font-weight: 600; letter-spacing: -.04em; }
+  .page-header { padding: 1.5rem 0 1.25rem; border-bottom: 1px solid var(--color-border); }
+  .page-title { font-family: var(--font-serif); font-size: clamp(2rem, 9vw, 5.5rem); font-weight: 600; letter-spacing: -.03em; }
   .count { font-size: .8rem; text-transform: none; letter-spacing: 0; }
-  .recipe-grid { grid-template-columns: 1fr; gap: 1rem; border: 0; }
+  .recipe-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; border: 0; }
   .recipe-grid :global(.card) { border: 0; border-radius: var(--radius-md); }
-  @media (min-width: 640px) { .recipe-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; } }
-  @media (min-width: 1024px) { .recipe-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; } }
-  @media (min-width: 1280px) { .recipe-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (min-width: 640px) { .recipe-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; } }
+  @media (min-width: 1024px) { .recipe-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; } }
 </style>

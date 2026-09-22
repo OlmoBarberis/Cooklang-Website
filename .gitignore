@@ -4,6 +4,7 @@ dist/
 public/images/
 .claude/
 recipes/
+screenshots/
 
 # Local Impeccable sessions and generated review artifacts
 .impeccable/mocks/

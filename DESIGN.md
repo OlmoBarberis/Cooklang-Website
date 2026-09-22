@@ -25,22 +25,22 @@ colors:
 typography:
   display:
     fontFamily: "Literata, Georgia, serif"
-    fontSize: "clamp(3.6rem, 12vw, 7rem)"
+    fontSize: "clamp(2.2rem, 10vw, 7rem)"
     fontWeight: 600
     lineHeight: 0.95
     letterSpacing: "-0.04em"
   recipe-title:
     fontFamily: "Literata, Georgia, serif"
-    fontSize: "clamp(2.9rem, 8vw, 6rem)"
+    fontSize: "clamp(2.1rem, 8vw, 6rem)"
     fontWeight: 600
-    lineHeight: 1.04
-    letterSpacing: "-0.04em"
+    lineHeight: 1.08
+    letterSpacing: "-0.03em"
   card-title:
     fontFamily: "Literata, Georgia, serif"
-    fontSize: "clamp(1.3rem, 2vw, 1.65rem)"
+    fontSize: "clamp(0.95rem, 3.6vw, 1.65rem)"
     fontWeight: 600
-    lineHeight: 1.18
-    letterSpacing: "-0.025em"
+    lineHeight: 1.2
+    letterSpacing: "-0.02em"
   body:
     fontFamily: "DM Sans, system-ui, sans-serif"
     fontSize: "16px"
@@ -128,7 +128,7 @@ The mobile view is the primary composition. There is no slogan, profile image, o
 
 ## Layout
 
-A 1320px maximum content width uses fluid side gutters. The homepage search sits immediately under the collection title. Recipe entries form one column on narrow phones, two from 640px, three from 1024px, and four from 1280px. Alphabet sections remain visible as navigational chapters.
+A 1320px maximum content width uses fluid side gutters. The homepage search sits immediately under the collection title. Recipe entries form two columns from the narrowest phones, three from 640px, and four from 1024px — mobile is dense grid browsing, not a single scrolling column. A vertical alphabet rail sits at the right edge of the content, held vertically centered in the viewport as you scroll, so jumping to a letter never requires scrolling back up. It's a real column reserved by layout, not an overlay positioned with a guessed offset — its width and clearance from the recipe grid come from flex, not a hand-tuned pixel value.
 
 Recipe detail pages place an image before the title when one exists. Ingredients precede steps on mobile; from 768px they become a sticky side panel beside the method. Tag pages share the card grid and type hierarchy. The layout stays readable when imagery is missing.
 
@@ -140,28 +140,31 @@ Recipe cards use a low, soft shadow with a real downward offset. Hover lifts a c
 
 ## Shapes
 
-Small controls use gently rounded corners. Search and card surfaces use 12px corners; tag and filter controls use pills. Images crop to a 4:3 frame on cards. Step numbers and serving choices use circles as clear, compact interaction marks.
+Small controls use gently rounded corners. Search and card surfaces use 12px corners; tag and filter controls use pills. Images crop to a 4:3 frame on cards. Step numbers and serving choices use circles as clear, compact interaction marks — smaller on mobile, full size from 768px. Selection state is shown through text, not a checkbox glyph: the checkbox input stays in the markup for accessibility but is visually hidden, and the whole row is one tappable label. Checked/selected feedback is a strikethrough, not a box or a fill.
 
 ## Components
 
 ### Search and filters
 - The search field is full width, tall enough for touch, and visibly outlined on focus.
-- Tag and ingredient menus are rounded pill controls with clear open and selected states.
-- Alphabet buttons remain compact and horizontally scrollable on phones.
+- Tag and ingredient menus are rounded pill controls with clear open and selected states; the disclosure chevron is a drawn CSS mark, not a text glyph.
+- Every filter row is a single tappable `<label>` with no visible checkbox — tap anywhere on the row, selection reads back as a tomato strikethrough on the label text.
+- Active tag/ingredient selections render as tomato-tinted pill chips with a remove mark, not neutral gray boxes.
+- The alphabet index is a fixed vertical rail pinned to the right edge of the viewport, not a horizontal scrolling bar — it stays reachable at any scroll position and highlights the letter currently in view.
 
 ### Recipe cards
-- A real food photograph or utensil placeholder leads, followed by concise metadata and a serif name.
+- A real food photograph or utensil placeholder leads, followed by concise metadata and a serif name, clamped to two lines.
 - The entire card is the link. Hover changes elevation; keyboard focus uses the accent outline.
+- Two cards sit side by side even on narrow phones; the grid densifies rather than falling back to one column.
 
 ### Recipe reading
-- The image, recipe name, labels, and serving metadata precede the cooking content.
-- Ingredients sit on a warm surface with visible checklist and multiplier controls.
+- The image, recipe name, labels, and serving metadata precede the cooking content, with clear space below the hero image before the category/tag pills begin. "Inizia a cucinare" (the wake-lock cooking-mode toggle) sits inline with the Porzioni/Fonte metadata as a tomato-outlined pill, filling solid tomato once active.
+- Ingredients sit on a warm surface; each row reads quantity first, then name. The checkbox is invisible — tapping the name toggles it, and feedback is the name striking through and fading, not a checked box. The quantity/unit stays an independently editable field so scaling never toggles the checkbox by accident. A "Ripristina dosi originali" control resets it.
 - Steps use circular numbers and quiet separators; section headings use Literata.
 - Inline ingredients, cookware, and timers retain their semantic colors.
 
 ### Navigation
-- The header holds only the site name and theme control.
-- Back links use plain sentence case and keep a visible hover/focus state.
+- The header holds the site name on the homepage. On recipe and tag pages it instead shows a contextual "← [Ricette]" back control in the same slot — the header never carries both the brand and a separate back link.
+- The theme control stays in the header's trailing position on every page.
 
 ## Do's and Don'ts
 

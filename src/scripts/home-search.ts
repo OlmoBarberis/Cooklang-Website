@@ -105,8 +105,13 @@ function render() {
   for (const input of [...tagInputs, ...ingredientInputs].filter((item) => item.checked)) {
     const chip = document.createElement('button');
     chip.type = 'button';
-    chip.textContent = `${input.value} ×`;
     chip.setAttribute('aria-label', `Rimuovi filtro ${input.value}`);
+    const label = document.createElement('span');
+    label.textContent = input.value;
+    const remove = document.createElement('span');
+    remove.className = 'chip-x';
+    remove.textContent = '×';
+    chip.append(label, remove);
     chip.addEventListener('click', () => { input.checked = false; update(true); });
     activeFilters.append(chip);
   }
@@ -133,5 +138,16 @@ clearButton.addEventListener('click', () => {
 for (const button of alphaButtons) button.addEventListener('click', () => {
   if (!button.disabled) document.getElementById(`letter-${button.dataset.letter}`)?.scrollIntoView({ behavior: 'smooth' });
 });
+
+// Highlight the alphabet rail letter for whichever section is currently in view.
+const sectionObserver = new IntersectionObserver((entries) => {
+  for (const entry of entries) {
+    if (!entry.isIntersecting) continue;
+    const letter = entry.target.id.slice('letter-'.length);
+    for (const button of alphaButtons) button.classList.toggle('alpha-active', button.dataset.letter === letter);
+  }
+}, { rootMargin: '-15% 0px -70% 0px' });
+for (const section of sections) sectionObserver.observe(section);
+
 window.addEventListener('popstate', fromUrl);
 fromUrl();

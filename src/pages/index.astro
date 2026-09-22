@@ -26,6 +26,9 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
 
 <BaseLayout title="Le mie ricette">
 
+  <div class="shell">
+  <div class="shell-main">
+
   <div class="filter-bar">
     <div class="filter-inner">
       <div class="browse-heading">
@@ -40,7 +43,7 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
         <details class="filter-menu">
           <summary>Tag <span id="tag-selection-count"></span></summary>
           <div class="filter-options" role="group" aria-label="Filtra per tag">
-            {allTags.map((tag) => <label class="filter-option"><input type="checkbox" name="tag" value={tag} />{tag}</label>)}
+            {allTags.map((tag) => <label class="filter-option check-row"><input type="checkbox" name="tag" value={tag} /><span>{tag}</span></label>)}
           </div>
         </details>
         <details class="filter-menu">
@@ -49,19 +52,12 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
             <label for="ingredient-search">Trova un ingrediente</label>
             <input id="ingredient-search" type="search" placeholder="Es. pomodoro" autocomplete="off" />
             <div class="filter-options ingredient-options" role="group" aria-label="Filtra per ingrediente">
-              {allIngredients.map((name) => <label class="filter-option ingredient-option" data-name={normalizeSearchText(name)}><input type="checkbox" name="ingredient" value={name} />{name}</label>)}
+              {allIngredients.map((name) => <label class="filter-option ingredient-option check-row" data-name={normalizeSearchText(name)}><input type="checkbox" name="ingredient" value={name} /><span>{name}</span></label>)}
             </div>
           </div>
         </details>
-        <span class="filter-hint">Tag: uno qualsiasi · Ingredienti: tutti</span>
       </div>
       <div id="active-filters" class="active-filters" aria-label="Filtri attivi" hidden></div>
-      <!-- Alphabet -->
-      <nav class="alpha-nav" aria-label="Salta alla lettera">
-        {letters.map((l) => (
-          <button class="alpha-btn" data-letter={l}>{l}</button>
-        ))}
-      </nav>
     </div>
   </div>
 
@@ -88,6 +84,19 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
     <p class="empty-state" id="empty-state" hidden>Nessuna ricetta trovata. Prova a rimuovere un filtro.</p>
 
   </div>
+
+  </div>
+  <!-- Alphabet: the outer nav is a real flex column stretched to page height, giving the
+       inner sticky pill room to travel; the pill itself keeps its natural size and stays
+       centered in the viewport via sticky top:50%, not a guessed pixel offset. -->
+  <nav class="alpha-rail-outer" aria-label="Salta alla lettera">
+    <div class="alpha-rail">
+      {letters.map((l) => (
+        <button class="alpha-btn" data-letter={l}>{l}</button>
+      ))}
+    </div>
+  </nav>
+  </div>
   <script id="recipe-search-data" type="application/json" set:html={searchData} />
 </BaseLayout>
 
@@ -99,22 +108,57 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
   #clear-filters { flex-shrink: 0; border: 0; background: transparent; color: var(--color-accent); font: inherit; font-size: .75rem; font-weight: 700; cursor: pointer; }
   .filter-controls { display: flex; align-items: center; gap: .75rem; padding-bottom: .5rem; flex-wrap: wrap; }
   .filter-menu { position: relative; }
-  .filter-menu summary { list-style: none; cursor: pointer; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: .3rem .65rem; font-size: .75rem; font-weight: 700; }
+  .filter-menu summary { list-style: none; cursor: pointer; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: .3rem .65rem; font-size: .75rem; font-weight: 700; display: inline-flex; align-items: center; transition: border-color .15s, background .15s; }
   .filter-menu summary::-webkit-details-marker { display: none; }
-  .filter-menu summary::after { content: ' ▾'; }
+  .filter-menu summary::after { content: ''; display: inline-block; width: .38rem; height: .38rem; margin-left: .45rem; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .18s ease; }
   .filter-menu[open] summary { border-color: var(--color-accent); }
+  .filter-menu[open] summary::after { transform: rotate(225deg) translateY(1px); }
   .filter-options, .ingredient-menu-body { position: absolute; z-index: 110; top: calc(100% + .25rem); left: 0; width: min(18rem, calc(100vw - 3rem)); max-height: 18rem; overflow-y: auto; padding: .5rem; border: 1px solid var(--color-border); background: var(--color-bg); box-shadow: 0 8px 20px #0002; }
   .ingredient-menu-body { max-height: none; }
   .ingredient-menu-body > label { display: block; font-size: .7rem; font-weight: 700; margin-bottom: .4rem; }
   .ingredient-options { position: static; width: 100%; max-height: 13rem; padding: .35rem 0 0; border: 0; box-shadow: none; }
-  .filter-option { display: flex; align-items: center; gap: .5rem; padding: .35rem; font-size: .8rem; cursor: pointer; }
+  .filter-option { padding: .45rem .5rem; border-radius: var(--radius-sm); font-size: .85rem; transition: background .12s ease, color .12s ease; }
   .filter-option[hidden] { display: none; }
   .filter-option:hover { background: var(--color-surface-alt); }
-  .filter-option input { accent-color: var(--color-accent); }
-  .filter-hint { font-size: .7rem; color: var(--color-muted); }
-  .active-filters { display: flex; flex-wrap: wrap; gap: .35rem; padding: 0 0 .5rem; }
+  .filter-option input[type="checkbox"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .filter-option:has(:checked) {
+    color: var(--color-accent-dk);
+    font-weight: 600;
+    text-decoration: line-through;
+    text-decoration-color: var(--color-accent);
+    text-decoration-thickness: 1.5px;
+  }
+  .filter-option:has(:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .active-filters { display: flex; flex-wrap: wrap; gap: .4rem; padding: 0 0 .5rem; }
   .active-filters[hidden] { display: none; }
-  .active-filters button { border: 1px solid var(--color-border); background: var(--color-surface-alt); color: var(--color-text); border-radius: var(--radius-sm); padding: .2rem .45rem; font: inherit; font-size: .7rem; cursor: pointer; }
+  /* Chips are created client-side, so they never carry Astro's scoping attribute — :global() is required for these rules to match. */
+  .active-filters :global(button) {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    border: 1px solid transparent;
+    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+    color: var(--color-accent-dk);
+    border-radius: 999px;
+    padding: .35rem .6rem .35rem .75rem;
+    font: inherit;
+    font-size: .75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .12s ease;
+  }
+  .active-filters :global(button:hover) { background: color-mix(in srgb, var(--color-accent) 20%, var(--color-surface)); }
+  .active-filters :global(.chip-x) { font-size: .95em; opacity: .7; }
   @media (max-width: 560px) { .search-row { flex-wrap: wrap; } .search-row label { width: 100%; } #recipe-search { flex: 1; } }
   /* ── Filter bar ── */
   .filter-bar {
@@ -133,34 +177,67 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
     flex-direction: column;
   }
 
-  /* ── Alphabet nav ── */
-  .alpha-nav {
+  /* ── Shell: the alphabet rail is a real flex column, sized and cleared by layout ── */
+  .shell {
     display: flex;
-    gap: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-    border-bottom: 1px solid var(--color-border);
-    padding: 0.5rem 0;
+    align-items: stretch;
   }
-  .alpha-nav::-webkit-scrollbar { display: none; }
+  .shell-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* ── Alphabet rail: the outer nav is a flex item stretched (by .shell's default
+     align-items: stretch) to the full page height, so the inner pill has the whole
+     page to travel across. The pill itself is sticky at top:50%, which keeps it
+     visually centered in the viewport while scrolling — the same effect `fixed`
+     gave us, but sized and cleared by real layout instead of a guessed offset. ── */
+  .alpha-rail-outer {
+    flex: 0 0 auto;
+  }
+  .alpha-rail {
+    position: sticky;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-inline: 0.4rem;
+    padding: 0.35rem 0.15rem;
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 4px 16px #21160b18;
+    max-height: 76vh;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .alpha-rail::-webkit-scrollbar { display: none; }
 
   .alpha-btn {
+    width: 1.2rem;
+    height: 1.2rem;
+    display: grid;
+    place-items: center;
     flex-shrink: 0;
-    font-size: 0.75rem;
+    font-size: 0.58rem;
     font-weight: 700;
-    letter-spacing: 0.05em;
-    padding: 0.3rem 0.5rem;
     border: none;
     background: transparent;
+    border-radius: 50%;
     color: var(--color-muted);
     cursor: pointer;
-    transition: color 0.1s;
+    transition: color 0.12s, background 0.12s;
     line-height: 1;
     text-transform: uppercase;
   }
   .alpha-btn:hover:not(:disabled) { color: var(--color-text); }
-  .alpha-btn.alpha-active { color: var(--color-accent); }
+  .alpha-btn.alpha-active { color: var(--color-surface); background: var(--color-accent); }
   .alpha-btn:disabled { opacity: 0.2; cursor: default; }
+  @media (min-width: 900px) {
+    .alpha-rail { margin-inline: 0.9rem; padding: 0.45rem 0.2rem; }
+    .alpha-btn { width: 1.5rem; height: 1.5rem; font-size: 0.68rem; }
+  }
 
   /* ── Page wrap ── */
   .page-wrap {
@@ -245,9 +322,6 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
   @media (min-width: 1024px) {
     .recipe-grid { grid-template-columns: repeat(4, 1fr); }
   }
-  @media (min-width: 1280px) {
-    .recipe-grid { grid-template-columns: repeat(5, 1fr); }
-  }
 
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
   .filter-bar { position: relative; background: var(--color-bg); border-bottom: 1px solid var(--color-border); }
@@ -261,24 +335,21 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
   #clear-filters { font-size: .85rem; }
   .filter-controls { gap: .5rem; padding-bottom: 1rem; }
   .filter-menu summary { padding: .55rem .9rem; font-size: .8rem; font-weight: 600; border-radius: 999px; background: var(--color-surface); }
-  .filter-hint { margin-left: auto; font-size: .85rem; line-height: 1.4; }
   .filter-options, .ingredient-menu-body { border-radius: var(--radius-md); box-shadow: 0 12px 30px #1f160f20; }
-  .alpha-nav { border-bottom: 0; border-top: 1px solid var(--color-border); padding: .75rem 0; }
-  .alpha-btn { min-width: 2.75rem; min-height: 2.75rem; font-size: .95rem; border-radius: 50%; }
-  .alpha-btn.alpha-active { background: var(--color-accent); color: var(--color-surface); }
   .count { padding: 2rem 0 0; margin-bottom: 2rem; font-size: .8rem; letter-spacing: .02em; text-transform: none; }
   .letter-section { margin-bottom: 3rem; scroll-margin-top: 1rem; }
   .letter-header { margin-bottom: 1.25rem; }
-  .letter-glyph { font-family: var(--font-serif); font-size: 2.5rem; font-weight: 600; letter-spacing: -.04em; text-transform: none; }
-  .recipe-grid { grid-template-columns: 1fr; gap: 1rem; border-left: 0; }
+  .letter-glyph { font-family: var(--font-serif); font-size: 1.7rem; font-weight: 600; letter-spacing: -.04em; text-transform: none; }
+  .recipe-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; border-left: 0; }
   .card-wrap :global(.card) { border: 0; border-radius: var(--radius-md); overflow: hidden; }
-  @media (min-width: 640px) { .recipe-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; } }
-  @media (min-width: 1024px) { .recipe-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; } }
-  @media (min-width: 1280px) { .recipe-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (min-width: 640px) { .recipe-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; } }
+  @media (min-width: 768px) { .letter-glyph { font-size: 2.5rem; } }
+  @media (min-width: 1024px) { .recipe-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; } }
   @media (max-width: 560px) {
     .browse-heading p { max-width: none; }
+    .browse-heading h1 { font-size: clamp(2.2rem, 10vw, 3rem); }
     .search-row { padding-top: 1.5rem; }
-    .filter-hint { width: 100%; margin: .25rem 0 0; }
+    #recipe-search { min-height: 3rem; padding: .65rem 1rem; font-size: .95rem; }
   }
 </style>
 
