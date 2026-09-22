@@ -2,13 +2,13 @@
 
 > **Note:** This project was almost entirely generated using AI tools (Claude Code by Anthropic).
 
-A sleek, mobile-first static website that renders a personal [Cooklang](https://cooklang.org) recipe collection. Built as a custom alternative to the default `cookcli` website generator, with a warm editorial design inspired by food publications.
+A mobile-first website that renders a personal [Cooklang](https://cooklang.org) recipe collection with Astro's Node server adapter.
 
 ## Features
 
 - **Warm editorial design** — Playfair Display headings, cream/terracotta palette, large hero images
 - **Recipe grid** — responsive 2→3→4 column layout with image cards
-- **Tag filtering** — browse recipes by category (Antipasto, Dolce, CBT, etc.)
+- **Search and filters** — MiniSearch searches recipe titles, tags, categories, and ingredients with prefix and typo matching. Select multiple tags (any match) and ingredients (all must match), and share the result URL.
 - **Ingredient multiplier** — scale quantities up or down with quick-select buttons (½×, 1×, 2×, 3×) or a custom value
 - **Interactive ingredient checklist** — check off ingredients as you cook; state persists across page reloads via `sessionStorage`
 - **Two-column recipe layout** — sticky ingredient sidebar alongside numbered steps on desktop, stacked on mobile
@@ -16,17 +16,18 @@ A sleek, mobile-first static website that renders a personal [Cooklang](https://
 - **Section headers** — `== Section Name ==` blocks render as named step groups
 - **Blockquote notes** — `> text` lines render as styled callout blocks
 - **Nested guides** — subfolders (e.g. `recipes/Guida al Sous Vide/`) are scanned recursively; the folder name becomes a category label
-- **Static output** — fully pre-rendered HTML, no JavaScript required to read recipes
+- **Server-rendered pages** — recipes are readable without JavaScript; interactive search and filters run in the browser
 
 ## Tech stack
 
 | Layer | Technology |
 |---|---|
-| Framework | [Astro 5](https://astro.build) — static output |
+| Framework | [Astro 5](https://astro.build) — Node server output |
+| Search | [MiniSearch](https://github.com/lucaong/minisearch) |
 | Cooklang parser | [`@cooklang/cooklang`](https://github.com/cooklang/cooklang-rs) v0.17 — Rust/WASM |
 | Frontmatter parser | [`gray-matter`](https://github.com/jonschlinkert/gray-matter) |
 | Fonts | Playfair Display + Lato via Google Fonts |
-| Server | node:20-alpine — Astro preview (Docker) |
+| Server | node:20-alpine — Astro standalone server (Docker) |
 | Language | TypeScript |
 
 ## Project structure

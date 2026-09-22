@@ -1,19 +1,19 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import RecipeCard from '../components/RecipeCard.astro';
-import { getAllRecipes, getAllTags } from '../lib/recipes';
+import { getAllRecipes, getAllTags, toRecipeSummary } from '../lib/recipes';
+import { normalizeSearchText } from '../lib/search-normalize';
 
 const recipes = getAllRecipes();
 const allTags = getAllTags();
-
-const summaries = recipes.map((r) => ({
-  slug: r.slug,
-  title: r.title,
-  tags: r.tags,
-  image: r.image,
-  category: r.category,
-  ingredientCount: r.ingredients.length,
-}));
+const summaries = recipes.map(toRecipeSummary);
+const ingredientNames = new Map<string, string>();
+for (const recipe of summaries) for (const name of recipe.ingredientNames) {
+  const key = normalizeSearchText(name);
+  if (!ingredientNames.has(key)) ingredientNames.set(key, name);
+}
+const allIngredients = [...ingredientNames.values()].sort((a, b) => a.localeCompare(b, 'it'));
+const searchData = JSON.stringify(summaries.map(({ slug, title, tags, category, ingredientNames }) => ({ slug, title, tags, category, ingredientNames }))).replace(/</g, '\u003c');
 
 const grouped: Record<string, typeof summaries> = {};
 for (const r of summaries) {
@@ -28,25 +28,43 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
 
   <div class="filter-bar">
     <div class="filter-inner">
+      <div class="search-row">
+        <label for="recipe-search">Cerca ricette</label>
+        <input id="recipe-search" type="search" placeholder="Nome, ingrediente o categoria…" autocomplete="off" />
+        <button id="clear-filters" type="button" hidden>Cancella filtri</button>
+      </div>
+      <div class="filter-controls">
+        <details class="filter-menu">
+          <summary>Tag <span id="tag-selection-count"></span></summary>
+          <div class="filter-options" role="group" aria-label="Filtra per tag">
+            {allTags.map((tag) => <label class="filter-option"><input type="checkbox" name="tag" value={tag} />{tag}</label>)}
+          </div>
+        </details>
+        <details class="filter-menu">
+          <summary>Ingredienti <span id="ingredient-selection-count"></span></summary>
+          <div class="ingredient-menu-body">
+            <label for="ingredient-search">Trova un ingrediente</label>
+            <input id="ingredient-search" type="search" placeholder="Es. pomodoro" autocomplete="off" />
+            <div class="filter-options ingredient-options" role="group" aria-label="Filtra per ingrediente">
+              {allIngredients.map((name) => <label class="filter-option ingredient-option" data-name={normalizeSearchText(name)}><input type="checkbox" name="ingredient" value={name} />{name}</label>)}
+            </div>
+          </div>
+        </details>
+        <span class="filter-hint">Tag: uno qualsiasi · Ingredienti: tutti</span>
+      </div>
+      <div id="active-filters" class="active-filters" aria-label="Filtri attivi" hidden></div>
       <!-- Alphabet -->
       <nav class="alpha-nav" aria-label="Salta alla lettera">
         {letters.map((l) => (
           <button class="alpha-btn" data-letter={l}>{l}</button>
         ))}
       </nav>
-      <!-- Tags -->
-      <div class="tag-nav" role="group" aria-label="Filtra per categoria">
-        <button class="tag-btn tag-active" data-tag="">Tutte</button>
-        {allTags.map((tag) => (
-          <button class="tag-btn" data-tag={tag}>{tag}</button>
-        ))}
-      </div>
     </div>
   </div>
 
   <div class="page-wrap">
 
-    <p class="count" id="recipe-count">{summaries.length} ricette</p>
+    <p class="count" id="recipe-count" aria-live="polite">{summaries.length} ricette</p>
 
     {letters.map((letter) => (
       <section class="letter-section" id={`letter-${letter}`}>
@@ -56,7 +74,7 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
         </div>
         <div class="recipe-grid">
           {grouped[letter].map((r) => (
-            <div class="card-wrap" data-tags={r.tags.join(',')}>
+            <div class="card-wrap" data-slug={r.slug}>
               <RecipeCard recipe={r} />
             </div>
           ))}
@@ -64,12 +82,37 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
       </section>
     ))}
 
-    <p class="empty-state" id="empty-state" hidden>Nessuna ricetta trovata.</p>
+    <p class="empty-state" id="empty-state" hidden>Nessuna ricetta trovata. Prova a rimuovere un filtro.</p>
 
   </div>
+  <script id="recipe-search-data" type="application/json" set:html={searchData} />
 </BaseLayout>
 
 <style>
+  .search-row { display: flex; align-items: center; gap: .75rem; padding: .75rem 0 .5rem; }
+  .search-row label { font-size: .75rem; font-weight: 700; white-space: nowrap; }
+  #recipe-search, #ingredient-search { min-width: 0; width: 100%; padding: .55rem .7rem; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg); color: var(--color-text); font: inherit; font-size: .875rem; }
+  #recipe-search:focus, #ingredient-search:focus { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+  #clear-filters { flex-shrink: 0; border: 0; background: transparent; color: var(--color-accent); font: inherit; font-size: .75rem; font-weight: 700; cursor: pointer; }
+  .filter-controls { display: flex; align-items: center; gap: .75rem; padding-bottom: .5rem; flex-wrap: wrap; }
+  .filter-menu { position: relative; }
+  .filter-menu summary { list-style: none; cursor: pointer; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: .3rem .65rem; font-size: .75rem; font-weight: 700; }
+  .filter-menu summary::-webkit-details-marker { display: none; }
+  .filter-menu summary::after { content: ' ▾'; }
+  .filter-menu[open] summary { border-color: var(--color-accent); }
+  .filter-options, .ingredient-menu-body { position: absolute; z-index: 110; top: calc(100% + .25rem); left: 0; width: min(18rem, calc(100vw - 3rem)); max-height: 18rem; overflow-y: auto; padding: .5rem; border: 1px solid var(--color-border); background: var(--color-bg); box-shadow: 0 8px 20px #0002; }
+  .ingredient-menu-body { max-height: none; }
+  .ingredient-menu-body > label { display: block; font-size: .7rem; font-weight: 700; margin-bottom: .4rem; }
+  .ingredient-options { position: static; width: 100%; max-height: 13rem; padding: .35rem 0 0; border: 0; box-shadow: none; }
+  .filter-option { display: flex; align-items: center; gap: .5rem; padding: .35rem; font-size: .8rem; cursor: pointer; }
+  .filter-option[hidden] { display: none; }
+  .filter-option:hover { background: var(--color-surface-alt); }
+  .filter-option input { accent-color: var(--color-accent); }
+  .filter-hint { font-size: .7rem; color: var(--color-muted); }
+  .active-filters { display: flex; flex-wrap: wrap; gap: .35rem; padding: 0 0 .5rem; }
+  .active-filters[hidden] { display: none; }
+  .active-filters button { border: 1px solid var(--color-border); background: var(--color-surface-alt); color: var(--color-text); border-radius: var(--radius-sm); padding: .2rem .45rem; font: inherit; font-size: .7rem; cursor: pointer; }
+  @media (max-width: 560px) { .search-row { flex-wrap: wrap; } .search-row label { width: 100%; } #recipe-search { flex: 1; } }
   /* ── Filter bar ── */
   .filter-bar {
     position: sticky;
@@ -112,40 +155,9 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
     line-height: 1;
     text-transform: uppercase;
   }
-  .alpha-btn:hover:not(.alpha-disabled) { color: var(--color-text); }
+  .alpha-btn:hover:not(:disabled) { color: var(--color-text); }
   .alpha-btn.alpha-active { color: var(--color-accent); }
-  .alpha-btn.alpha-disabled { opacity: 0.2; cursor: default; }
-
-  /* ── Tag filters ── */
-  .tag-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0;
-    padding: 0.5rem 0;
-  }
-
-  .tag-btn {
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    padding: 0.35rem 0.75rem;
-    border: none;
-    background: transparent;
-    color: var(--color-muted);
-    cursor: pointer;
-    transition: color 0.1s, background 0.1s;
-    white-space: nowrap;
-    border-radius: var(--radius-sm);
-  }
-  .tag-btn:hover:not(.tag-active) {
-    color: var(--color-text);
-    background: var(--color-surface-alt);
-  }
-  .tag-btn.tag-active {
-    background: var(--color-border-strong);
-    color: var(--color-bg);
-  }
+  .alpha-btn:disabled { opacity: 0.2; cursor: default; }
 
   /* ── Page wrap ── */
   .page-wrap {
@@ -236,67 +248,5 @@ const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
 </style>
 
 <script>
-  const header = document.querySelector<HTMLElement>('.site-header');
-  const filterBar = document.querySelector<HTMLElement>('.filter-bar');
-  const sections = Array.from(document.querySelectorAll<HTMLElement>('.letter-section'));
-
-  if (header && filterBar) {
-    const pin = () => {
-      const h = header.offsetHeight;
-      filterBar.style.top = h + 'px';
-      const combined = h + filterBar.offsetHeight + 16;
-      sections.forEach((s) => { s.style.scrollMarginTop = combined + 'px'; });
-    };
-    pin();
-    new ResizeObserver(pin).observe(header);
-    new ResizeObserver(pin).observe(filterBar);
-  }
-
-  const countEl = document.getElementById('recipe-count')!;
-  const emptyState = document.getElementById('empty-state') as HTMLElement;
-  const alphaBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.alpha-btn'));
-  const tagBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('.tag-btn'));
-
-  let activeTag = '';
-
-  function applyFilter() {
-    let total = 0;
-    for (const section of sections) {
-      const cards = Array.from(section.querySelectorAll<HTMLElement>('.card-wrap'));
-      let count = 0;
-      for (const card of cards) {
-        const tags = (card.dataset.tags ?? '').split(',').filter(Boolean);
-        const match = !activeTag || tags.includes(activeTag);
-        card.hidden = !match;
-        if (match) count++;
-      }
-      section.hidden = count === 0;
-      total += count;
-      const letter = section.id.slice('letter-'.length);
-      alphaBtns.find((b) => b.dataset.letter === letter)
-        ?.classList.toggle('alpha-disabled', count === 0);
-    }
-    countEl.textContent = `${total} ricett${total === 1 ? 'a' : 'e'}`;
-    emptyState.hidden = total > 0;
-  }
-
-  for (const btn of tagBtns) {
-    btn.addEventListener('click', () => {
-      activeTag = btn.dataset.tag ?? '';
-      tagBtns.forEach((b) => b.classList.remove('tag-active'));
-      btn.classList.add('tag-active');
-      applyFilter();
-    });
-  }
-
-  for (const btn of alphaBtns) {
-    btn.addEventListener('click', () => {
-      const section = document.getElementById(`letter-${btn.dataset.letter}`);
-      if (!section || section.hidden) return;
-      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      alphaBtns.forEach((b) => b.classList.remove('alpha-active'));
-      btn.classList.add('alpha-active');
-      setTimeout(() => btn.classList.remove('alpha-active'), 1200);
-    });
-  }
+  import "../scripts/home-search";
 </script>

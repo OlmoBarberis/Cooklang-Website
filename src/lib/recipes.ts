@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
+import { normalizeSearchText } from './search-normalize';
 import {
   CooklangParser,
   getFlatIngredients,
@@ -71,6 +72,34 @@ export interface ParsedRecipe {
   timers: FlatTimer[];
   inlineQuantities: FlatInlineQty[];
   sections: RecipeSection[];
+}
+
+export interface RecipeSummary {
+  slug: string;
+  title: string;
+  tags: string[];
+  image?: string;
+  category?: string;
+  ingredientCount: number;
+  ingredientNames: string[];
+}
+
+export function toRecipeSummary(recipe: ParsedRecipe): RecipeSummary {
+  const names = new Map<string, string>();
+  for (const ingredient of recipe.ingredients) {
+    const name = ingredient.name.trim();
+    const key = normalizeSearchText(name);
+    if (key && !names.has(key)) names.set(key, name);
+  }
+  return {
+    slug: recipe.slug,
+    title: recipe.title,
+    tags: recipe.tags,
+    image: recipe.image,
+    category: recipe.category,
+    ingredientCount: names.size,
+    ingredientNames: [...names.values()],
+  };
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -221,6 +250,7 @@ function parseFile(filePath: string, category?: string): ParsedRecipe | null {
 
 function scanDir(dir: string, category?: string): ParsedRecipe[] {
   const results: ParsedRecipe[] = [];
+  if (!fs.existsSync(dir)) return results;
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
     const full = path.join(dir, entry.name);
@@ -237,8 +267,19 @@ function scanDir(dir: string, category?: string): ParsedRecipe[] {
 // ── Public API ────────────────────────────────────────────────────────────────
 
 export function getAllRecipes(): ParsedRecipe[] {
-  return scanDir(RECIPES_DIR).sort((a, b) => a.title.localeCompare(b.title, 'it'));
+  if (process.env.NODE_ENV !== 'production') return scanDir(RECIPES_DIR).sort((a, b) => a.title.localeCompare(b.title, 'it'));
+  if (!recipeCache) {
+    recipeCache = scanDir(RECIPES_DIR).sort((a, b) => a.title.localeCompare(b.title, 'it'));
+    const slugs = new Set<string>();
+    for (const recipe of recipeCache) {
+      if (slugs.has(recipe.slug)) console.warn(`Duplicate recipe slug: ${recipe.slug}`);
+      slugs.add(recipe.slug);
+    }
+  }
+  return recipeCache;
 }
+
+let recipeCache: ParsedRecipe[] | undefined;
 
 export function getRecipeBySlug(slug: string): ParsedRecipe | undefined {
   return getAllRecipes().find((r) => r.slug === slug);

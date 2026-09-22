@@ -1,19 +1,12 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RecipeCard from '../../components/RecipeCard.astro';
-import { getRecipesByTag } from '../../lib/recipes';
+import { getRecipesByTag, toRecipeSummary } from '../../lib/recipes';
 
 const { tag } = Astro.params;
 const recipes = getRecipesByTag(tag ?? '');
 if (recipes.length === 0) return new Response(null, { status: 404 });
-const summaries = recipes.map((r) => ({
-  slug: r.slug,
-  title: r.title,
-  tags: r.tags,
-  image: r.image,
-  category: r.category,
-  ingredientCount: r.ingredients.length,
-}));
+const summaries = recipes.map(toRecipeSummary);
 ---
 
 <BaseLayout title={tag}>
