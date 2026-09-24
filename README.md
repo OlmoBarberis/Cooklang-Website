@@ -8,14 +8,14 @@ A mobile-first website that renders a personal [Cooklang](https://cooklang.org) 
 
 - **Responsive design** — Inter typography, light and dark themes, and large recipe images
 - **Recipe grid** — responsive 2→3→4→5 column layout with image cards
-- **Search and filters** — MiniSearch searches recipe titles, tags, categories, and ingredients with prefix and typo matching. Select multiple tags (any match) and ingredients (all must match), and share the result URL.
+- **Search and filters** — MiniSearch searches recipe titles, tags, and ingredients with prefix and typo matching. Select multiple tags (any match) and ingredients (all must match), and share the result URL.
 - **Ingredient multiplier** — scale quantities up or down with quick-select buttons (½×, 1×, 2×, 3×) or a custom value
 - **Interactive ingredient checklist** — check off ingredients as you cook; state persists across page reloads via `sessionStorage`
 - **Two-column recipe layout** — sticky ingredient sidebar alongside numbered steps on desktop, stacked on mobile
 - **Inline token highlighting** — ingredients, cookware, and timers are visually distinguished within step text
 - **Section headers** — `== Section Name ==` blocks render as named step groups
 - **Blockquote notes** — `> text` lines render as styled callout blocks
-- **Nested guides** — subfolders (e.g. `recipes/Guida al Sous Vide/`) are scanned recursively; the folder name becomes a category label
+- **Guides section** — files tagged `Guida` are published at `/guide` instead of the recipe grid, as single-page guides or ordered multi-chapter collections (one folder per collection)
 - **Server-rendered pages** — recipes are readable without JavaScript; interactive search and filters run in the browser
 
 ## Tech stack
@@ -35,9 +35,9 @@ A mobile-first website that renders a personal [Cooklang](https://cooklang.org) 
 ```
 .
 ├── recipes/                  # ⚠ NOT in git — mount at runtime (see Docker section)
-│   ├── *.cook
-│   ├── Guida al Sous Vide/   # Subfolder → becomes "category" on cards
-│   │   └── *.cook
+│   ├── *.cook                # Recipes, and single-page guides (tag: Guida)
+│   ├── Guida al Sous Vide/   # Guide collection: one chapter per Guida-tagged file
+│   │   └── 01-*.cook         # NN- prefix sets chapter order
 │   └── images/               # Local recipe images
 ├── src/
 │   ├── lib/
@@ -49,10 +49,17 @@ A mobile-first website that renders a personal [Cooklang](https://cooklang.org) 
 │   │   ├── index.astro       # Homepage (recipe grid + search filters)
 │   │   ├── recipe/
 │   │   │   └── [slug].astro  # Recipe detail page
-│   │   └── tag/
-│   │       └── [tag].astro   # Tag-filtered grid
+│   │   ├── tag/
+│   │   │   └── [tag].astro   # Tag-filtered grid + related guides
+│   │   └── guide/
+│   │       ├── index.astro   # Guide index
+│   │       ├── [slug].astro  # Single-page guide or collection chapter list
+│   │       └── [collection]/
+│   │           └── [chapter].astro # Collection chapter
 │   ├── components/
 │       ├── RecipeCard.astro  # Card used in grids
+│       ├── GuideCard.astro   # Card for guides and collections
+│       ├── GuideArticle.astro # Reading layout for guides and chapters
 │       └── StepText.astro    # Renders a step with inline token highlighting
 │   └── scripts/
 │       └── home-search.ts    # MiniSearch and URL-backed filters
@@ -92,6 +99,16 @@ Rest for ~{20%minuti}.
 
 Supported frontmatter fields: `title`, `tags` / `tag` (string, comma-separated string, or array), `image` / `images`, `servings`, `source`.
 
+### Guides
+
+A file whose tags include `Guida` (any capitalization) is a guide, not a recipe. Guides never appear on the recipe page, its search, or its filters; they live under `/guide`.
+
+- **Single-page guide** — a `Guida` file directly in `recipes/`, e.g. `recipes/Guida-alla-cottura-sous-vide.cook` → `/guide/guida-alla-cottura-sous-vide`.
+- **Guide collection** — a folder of `Guida` files, one chapter per file. The folder name is the collection title, e.g. `recipes/Guida al Sous Vide/` → `/guide/guida-al-sous-vide`.
+- **Chapter order** — prefix chapter filenames with a number (`01-`, `02-`, …). The prefix sets the order and is stripped from the URL, so `01-Introduzione al Sous Vide.cook` → `/guide/guida-al-sous-vide/introduzione-al-sous-vide`. Unprefixed chapters come last, by title.
+
+Guide paragraphs render as prose (no step numbers, no ingredient panel). Tag pages list guides that share the tag under "Guide correlate". Files without the `Guida` tag are recipes wherever they live; recipe folders are not used for grouping.
+
 ## Local development
 
 **Prerequisites:** Node.js 20+
@@ -107,7 +124,7 @@ npm run dev
 
 The `sync-images.mjs` script copies `recipes/images/` into `public/images/` for development and `dist/client/images/` for the standalone server. It runs automatically before `dev` and `start`.
 
-The homepage builds a compact MiniSearch index in the browser from recipe titles, tags, categories, and ingredient names. Text search requires every query word; selected tags match any tag, while selected ingredients must all be present. Search state is stored in the URL. The recipe catalog is cached for the life of the production server process, so restart the server after changing `.cook` files.
+The homepage builds a compact MiniSearch index in the browser from recipe titles, tags, and ingredient names. Text search requires every query word; selected tags match any tag, while selected ingredients must all be present. Search state is stored in the URL. The recipe catalog is cached for the life of the production server process, so restart the server after changing `.cook` files.
 
 To preview the production build locally:
 

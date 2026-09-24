@@ -1,0 +1,106 @@
+---
+import type { GuideEntry } from '../lib/recipes';
+
+interface Props {
+  guide: GuideEntry;
+}
+
+const { guide } = Astro.props;
+const imageSrc = guide.image
+  ? guide.image.startsWith('http') ? guide.image : `/${guide.image}`
+  : null;
+const kindLabel = guide.kind === 'collection'
+  ? `Raccolta · ${guide.chapters.length} ${guide.chapters.length === 1 ? 'capitolo' : 'capitoli'}`
+  : 'Guida';
+---
+
+<a href={`/guide/${guide.slug}`} class="guide-card">
+  <div class="guide-card-image">
+    {imageSrc ? (
+      <img src={imageSrc} alt="" loading="lazy" decoding="async" />
+    ) : (
+      <div class="guide-card-placeholder" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="placeholder-icon">
+          <!-- Open book -->
+          <path d="M32 20 C26 16 18 15 12 16 V46 C18 45 26 46 32 50 C38 46 46 45 52 46 V16 C46 15 38 16 32 20 Z" />
+          <line x1="32" y1="20" x2="32" y2="50" />
+        </svg>
+      </div>
+    )}
+  </div>
+  <div class="guide-card-body">
+    <p class="guide-card-meta">{kindLabel}</p>
+    <h2 class="guide-card-title">{guide.title}</h2>
+  </div>
+</a>
+
+<style>
+  .guide-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-radius: var(--radius-md);
+    box-shadow: 0 1px 2px #21160b12, 0 8px 22px #21160b0a;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .guide-card:hover {
+    color: var(--color-text);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 12px #21160b16, 0 18px 36px #21160b10;
+  }
+  .guide-card:hover img { transform: scale(1.04); }
+  .guide-card:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+
+  .guide-card-image {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--color-surface-alt);
+  }
+  .guide-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .5s ease;
+  }
+  .guide-card-placeholder {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    color: var(--color-border);
+  }
+  .placeholder-icon { width: 48px; height: 48px; }
+
+  .guide-card-body {
+    padding: .65rem .7rem .8rem;
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+  }
+  .guide-card-meta {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+    color: var(--color-accent);
+  }
+  .guide-card-title {
+    font-family: var(--font-serif);
+    font-size: clamp(.95rem, 3.6vw, 1.2rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -.02em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  @media (min-width: 640px) {
+    .guide-card-body { padding: 1rem 1rem 1.25rem; gap: .5rem; }
+    .guide-card-meta { font-size: .78rem; }
+    .guide-card-title { font-size: clamp(1.3rem, 2vw, 1.65rem); line-height: 1.18; letter-spacing: -.025em; }
+  }
+  @media (prefers-reduced-motion: reduce) { .guide-card, .guide-card-image img { transition: none; } }
+</style>

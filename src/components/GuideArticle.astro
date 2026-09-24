@@ -1,0 +1,247 @@
+---
+import StepText from './StepText.astro';
+import { formatInlineTokens, tableIndexOf, type GuideDoc } from '../lib/recipes';
+
+interface Props {
+  doc: GuideDoc;
+}
+
+const { doc } = Astro.props;
+const imageSrc = doc.image
+  ? doc.image.startsWith('http') ? doc.image : `/${doc.image}`
+  : null;
+
+const isWarning = (text: string) => /^attenzione\b/i.test(text.trim());
+---
+
+<article class="guide-wrap">
+  <header class="guide-header">
+    <slot name="eyebrow" />
+    <h1 class="guide-title">{doc.title}</h1>
+    {(doc.tags.length > 0 || doc.source) && (
+      <div class="guide-meta">
+        {doc.tags.map((tag) => (
+          <a href={`/tag/${encodeURIComponent(tag)}`} class="tag">{tag}</a>
+        ))}
+        {doc.source && (
+          doc.source.startsWith('http')
+            ? <a href={doc.source} class="guide-source" target="_blank" rel="noopener">Fonte originale ↗</a>
+            : <span class="guide-source">Fonte: {doc.source}</span>
+        )}
+      </div>
+    )}
+  </header>
+
+  {imageSrc && (
+    <figure class="guide-figure">
+      <img src={imageSrc} alt="" decoding="async" />
+    </figure>
+  )}
+
+  <div class="guide-body">
+    {doc.sections.map((section) => (
+      section.content.length > 0 && (
+        <section class="guide-section">
+          {section.title && <h2 class="guide-section-title">{section.title}</h2>}
+          {section.content.map((item) => {
+            if (item.type === 'note') {
+              const text = formatInlineTokens(item.text);
+              return (
+                <aside class:list={['callout', { 'callout-warning': isWarning(text) }]}>
+                  <p>{text}</p>
+                </aside>
+              );
+            }
+            const tableIndex = tableIndexOf(item.step);
+            const table = tableIndex !== null ? doc.tables[tableIndex] : undefined;
+            if (table) {
+              const [head, ...rows] = table;
+              return (
+                <div class="table-scroll" tabindex="0" role="region" aria-label={section.title ?? 'Tabella'}>
+                  <table class="guide-table">
+                    <thead>
+                      <tr>{head.map((cell) => <th scope="col">{formatInlineTokens(cell)}</th>)}</tr>
+                    </thead>
+                    <tbody>
+                      {rows.map((row) => (
+                        <tr>{row.map((cell, i) => i === 0
+                          ? <th scope="row">{formatInlineTokens(cell)}</th>
+                          : <td>{formatInlineTokens(cell)}</td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            }
+            return (
+              <StepText
+                step={item.step}
+                ingredients={doc.ingredients}
+                cookwares={doc.cookwares}
+                timers={doc.timers}
+                inlineQuantities={doc.inlineQuantities}
+              />
+            );
+          })}
+        </section>
+      )
+    ))}
+  </div>
+
+  <slot />
+</article>
+
+<style>
+  /* One reading column: ~37rem of 1.05rem DM Sans keeps prose near 70 characters per line. */
+  .guide-wrap {
+    max-width: calc(37rem + 2 * clamp(1rem, 4vw, 3rem));
+    margin: 0 auto;
+    padding: 1.5rem clamp(1rem, 4vw, 3rem) 4rem;
+  }
+
+  .guide-header { margin-bottom: 1.5rem; }
+
+  .guide-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 7vw, 3.4rem);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -.03em;
+    text-wrap: balance;
+    margin-bottom: .9rem;
+  }
+
+  .guide-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .25rem .75rem;
+  }
+  /* Visual pills stay small; the tap area extends to 44px tall. */
+  .guide-meta a {
+    position: relative;
+  }
+  .guide-meta a::after {
+    content: '';
+    position: absolute;
+    inset: 50% 0 auto;
+    height: 44px;
+    transform: translateY(-50%);
+  }
+  .guide-source {
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+  span.guide-source { color: var(--color-muted); }
+
+  .guide-figure {
+    margin: 0 0 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .guide-figure img {
+    width: auto;
+    max-width: 100%;
+    max-height: 70vh;
+    margin-inline: auto;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme="light"]) .guide-figure img { filter: brightness(.88); }
+  }
+  html[data-theme="dark"] .guide-figure img { filter: brightness(.88); }
+
+  .guide-header:not(:has(+ .guide-figure)) {
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .guide-section + .guide-section { margin-top: 2.75rem; }
+
+  .guide-section-title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.4rem, 4.5vw, 1.9rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -.02em;
+    text-wrap: balance;
+    margin-bottom: .85rem;
+  }
+
+  .guide-body :global(.step-text) {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    margin-bottom: 1.1rem;
+    text-wrap: pretty;
+  }
+
+  /* Tokens read as plain text in prose: no semantic cooking colours, no timer glyph. */
+  .guide-body :global(.token-ingredient),
+  .guide-body :global(.token-cookware),
+  .guide-body :global(.token-timer),
+  .guide-body :global(.token-inline-qty) {
+    color: inherit;
+    font-style: normal;
+    font-weight: inherit;
+  }
+  .guide-body :global(.token-timer::before) { content: none; }
+
+  .callout {
+    margin: 1.5rem 0;
+    padding: .9rem 1.1rem;
+    background: var(--color-surface-alt);
+    border-radius: var(--radius-md);
+  }
+  .callout p {
+    font-size: .98rem;
+    line-height: 1.65;
+    color: var(--color-muted);
+    text-wrap: pretty;
+  }
+  .callout-warning {
+    background: color-mix(in srgb, var(--color-accent) 9%, var(--color-surface));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 45%, transparent);
+  }
+  .callout-warning p { color: var(--color-text); }
+
+  .table-scroll {
+    margin: 1.25rem 0 1.75rem;
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-border);
+  }
+  .table-scroll:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+  .guide-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .92rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .guide-table th,
+  .guide-table td {
+    padding: .55rem .6rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  /* Short values (sizes, times, temperatures) stay on one line; names and notes wrap. */
+  .guide-table td { white-space: nowrap; }
+  .guide-table tbody th { min-width: 6.5rem; }
+  .guide-table thead th {
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    background: var(--color-surface-alt);
+  }
+  .guide-table tbody th { font-weight: 600; }
+  .guide-table tbody tr + tr > * { border-top: 1px solid var(--color-border); }
+  .guide-table td:last-child:not(:nth-child(-n+3)) { white-space: normal; min-width: 8rem; }
+  @media (min-width: 640px) {
+    .guide-table th, .guide-table td { padding: .6rem .85rem; }
+  }
+</style>

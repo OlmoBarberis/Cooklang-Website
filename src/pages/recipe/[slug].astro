@@ -26,7 +26,7 @@ const servingsNum = recipe.servings !== undefined && /^\d+(\.\d+)?$/.test(recipe
   : null;
 ---
 
-<BaseLayout title={recipe.title} image={imageSrc ?? undefined} back="/">
+<BaseLayout title={recipe.title} image={imageSrc ?? undefined} back="/" section="ricette">
 
   {imageSrc && (
     <div class="hero">
@@ -38,7 +38,6 @@ const servingsNum = recipe.servings !== undefined && /^\d+(\.\d+)?$/.test(recipe
 
     <header class="recipe-header">
       <div class="recipe-labels">
-        {recipe.category && <span class="label">{recipe.category}</span>}
         {recipe.tags.map((tag) => (
           <a href={`/tag/${encodeURIComponent(tag)}`} class="label label-link">{tag}</a>
         ))}

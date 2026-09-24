@@ -1,0 +1,135 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import GuideArticle from '../../../components/GuideArticle.astro';
+import { getChapter } from '../../../lib/recipes';
+
+const { collection: collectionSlug, chapter: chapterSlug } = Astro.params;
+const view = getChapter(collectionSlug ?? '', chapterSlug ?? '');
+if (!view) return new Response(null, { status: 404 });
+
+const { collection, chapter, position, total, prev, next } = view;
+const base = `/guide/${collection.slug}`;
+const image = chapter.image
+  ? chapter.image.startsWith('http') ? chapter.image : `/${chapter.image}`
+  : undefined;
+---
+
+<BaseLayout title={chapter.title} image={image} back={base} backLabel={collection.title} section="guide">
+  <GuideArticle doc={chapter}>
+    <p class="chapter-crumb" slot="eyebrow">
+      <a href={base}>{collection.title}</a>
+      <span class="sep" aria-hidden="true">·</span>
+      <span>Capitolo {position} di {total}</span>
+    </p>
+
+    {(prev || next) && (
+      <nav class="pager" aria-label="Capitoli">
+        {prev && (
+          <a href={`${base}/${prev.slug}`} class="pager-link pager-prev" rel="prev">
+            <span class="pager-dir">← Capitolo precedente</span>
+            <span class="pager-title">{prev.title}</span>
+          </a>
+        )}
+        {next && (
+          <a href={`${base}/${next.slug}`} class="pager-link pager-next" rel="next">
+            <span class="pager-dir">Capitolo successivo →</span>
+            <span class="pager-title">{next.title}</span>
+          </a>
+        )}
+      </nav>
+    )}
+
+    {!next && (
+      <aside class="guide-end">
+        <p class="guide-end-title">Hai finito la guida</p>
+        <div class="guide-end-links">
+          <a href={base} class="guide-end-link">Torna ai capitoli di {collection.title}</a>
+          {collection.tags.map((tag) => (
+            <a href={`/tag/${encodeURIComponent(tag)}`} class="guide-end-link">Ricette {tag}</a>
+          ))}
+        </div>
+      </aside>
+    )}
+  </GuideArticle>
+</BaseLayout>
+
+<style>
+  .chapter-crumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin-bottom: .6rem;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+  .chapter-crumb a { position: relative; color: var(--color-accent); }
+  .chapter-crumb a::after { content: ''; position: absolute; inset: 50% 0 auto; height: 44px; transform: translateY(-50%); }
+  .chapter-crumb a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .sep { color: var(--color-border); }
+
+  .pager {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .75rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+  @media (min-width: 640px) {
+    .pager { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pager-next { grid-column: 2; text-align: right; }
+  }
+
+  .pager-link {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+    padding: 1rem 1.1rem;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: 0 1px 2px #21160b12, 0 8px 22px #21160b0a;
+    color: var(--color-text);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .pager-link:hover {
+    color: var(--color-text);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px #21160b16, 0 18px 36px #21160b10;
+  }
+  .pager-dir { font-size: .78rem; font-weight: 600; color: var(--color-accent); }
+  .pager-title {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -.015em;
+  }
+  .guide-end {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    border-radius: var(--radius-md);
+    background: var(--color-surface-alt);
+  }
+  .guide-end-title {
+    font-family: var(--font-serif);
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: -.015em;
+    margin-bottom: .6rem;
+  }
+  .guide-end-links { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .guide-end-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 1rem;
+    border-radius: 999px;
+    background: var(--color-surface);
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+  .guide-end-link:hover { background: var(--color-accent); color: var(--color-surface); }
+  @media (prefers-reduced-motion: reduce) { .pager-link { transition: none; } }
+</style>

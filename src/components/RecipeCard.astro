@@ -36,10 +36,8 @@ const isExternalImage = recipe.image?.startsWith('http');
     )}
   </div>
   <div class="card-body">
-    {(recipe.category || recipe.tags.length > 0) && (
+    {recipe.tags.length > 0 && (
       <p class="card-meta">
-        {recipe.category && <span>{recipe.category}</span>}
-        {recipe.category && recipe.tags.length > 0 && <span class="sep">·</span>}
         {recipe.tags.slice(0, 2).map((tag, i) => (
           <>
             {i > 0 && <span class="sep">·</span>}

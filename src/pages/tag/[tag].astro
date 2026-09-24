@@ -1,15 +1,17 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RecipeCard from '../../components/RecipeCard.astro';
-import { getRecipesByTag, toRecipeSummary } from '../../lib/recipes';
+import GuideCard from '../../components/GuideCard.astro';
+import { getGuidesByTag, getRecipesByTag, toRecipeSummary } from '../../lib/recipes';
 
 const { tag } = Astro.params;
 const recipes = getRecipesByTag(tag ?? '');
-if (recipes.length === 0) return new Response(null, { status: 404 });
+const guides = getGuidesByTag(tag ?? '');
+if (recipes.length === 0 && guides.length === 0) return new Response(null, { status: 404 });
 const summaries = recipes.map(toRecipeSummary);
 ---
 
-<BaseLayout title={tag} back="/" backLabel="Tutte le ricette">
+<BaseLayout title={tag} back="/" backLabel="Tutte le ricette" section="ricette">
   <div class="page-wrap">
 
     <div class="page-header">
@@ -19,9 +21,23 @@ const summaries = recipes.map(toRecipeSummary);
       </div>
     </div>
 
-    <div class="recipe-grid">
-      {summaries.map((r) => <RecipeCard recipe={r} />)}
-    </div>
+    {guides.length > 0 && (
+      <section class="related-guides" aria-labelledby="related-guides-title">
+        <h2 id="related-guides-title" class="related-title">Guide correlate</h2>
+        <div class="related-row">
+          {guides.map((g) => <div class="related-item"><GuideCard guide={g} /></div>)}
+        </div>
+      </section>
+    )}
+
+    {guides.length > 0 && summaries.length > 0 && <h2 class="related-title">Ricette</h2>}
+    {summaries.length > 0 ? (
+      <div class="recipe-grid">
+        {summaries.map((r) => <RecipeCard recipe={r} />)}
+      </div>
+    ) : (
+      <p class="empty-state">Nessuna ricetta con questo tag.</p>
+    )}
 
   </div>
 </BaseLayout>
@@ -91,4 +107,39 @@ const summaries = recipes.map(toRecipeSummary);
   .recipe-grid :global(.card) { border: 0; border-radius: var(--radius-md); }
   @media (min-width: 640px) { .recipe-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; } }
   @media (min-width: 1024px) { .recipe-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; } }
+  .related-guides { margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--color-border); }
+  .related-title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.25rem, 4vw, 1.6rem);
+    font-weight: 600;
+    letter-spacing: -.02em;
+    margin-bottom: .85rem;
+  }
+  /* Mobile: a horizontal scroll-snap row; bleeds to the page edge so the next card peeks. */
+  .related-row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(10.5rem, 46%);
+    gap: .7rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    margin-inline: calc(-1 * clamp(1rem, 4vw, 3rem));
+    padding: .25rem clamp(1rem, 4vw, 3rem) 1rem;
+    scroll-padding-inline: clamp(1rem, 4vw, 3rem);
+    scrollbar-width: none;
+  }
+  .related-row::-webkit-scrollbar { display: none; }
+  .related-item { scroll-snap-align: start; }
+  @media (min-width: 640px) {
+    .related-row {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.25rem;
+      overflow: visible;
+      margin-inline: 0;
+      padding: 0;
+    }
+  }
+  @media (min-width: 1024px) { .related-row { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; } }
+  .empty-state { padding: 2rem 0; color: var(--color-muted); }
 </style>

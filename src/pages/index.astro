@@ -13,7 +13,7 @@ for (const recipe of summaries) for (const name of recipe.ingredientNames) {
   if (!ingredientNames.has(key)) ingredientNames.set(key, name);
 }
 const allIngredients = [...ingredientNames.values()].sort((a, b) => a.localeCompare(b, 'it'));
-const searchData = JSON.stringify(summaries.map(({ slug, title, tags, category, ingredientNames }) => ({ slug, title, tags, category, ingredientNames }))).replace(/</g, '\u003c');
+const searchData = JSON.stringify(summaries.map(({ slug, title, tags, ingredientNames }) => ({ slug, title, tags, ingredientNames }))).replace(/</g, '\u003c');
 
 const grouped: Record<string, typeof summaries> = {};
 for (const r of summaries) {
@@ -24,7 +24,7 @@ for (const r of summaries) {
 const letters = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'it'));
 ---
 
-<BaseLayout title="Le mie ricette">
+<BaseLayout title="Le mie ricette" section="ricette">
 
   <div class="shell">
   <div class="shell-main">

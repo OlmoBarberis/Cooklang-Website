@@ -5,14 +5,13 @@ interface SearchDocument {
   slug: string;
   title: string;
   tags: string[];
-  category?: string;
   ingredientNames: string[];
 }
 
 const documents = JSON.parse(document.getElementById('recipe-search-data')!.textContent ?? '[]') as SearchDocument[];
 const engine = new MiniSearch<SearchDocument>({
   idField: 'slug',
-  fields: ['title', 'tags', 'category', 'ingredientNames'],
+  fields: ['title', 'tags', 'ingredientNames'],
   storeFields: ['slug'],
   extractField: (doc, field) => {
     const value = doc[field as keyof SearchDocument];

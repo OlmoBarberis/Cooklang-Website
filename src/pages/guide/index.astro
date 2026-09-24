@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GuideCard from '../../components/GuideCard.astro';
+import { getGuideIndex } from '../../lib/recipes';
+
+const guides = getGuideIndex();
+---
+
+<BaseLayout title="Guide" description="Guide e approfondimenti di cucina" section="guide">
+  <div class="page-wrap">
+    <header class="page-header">
+      <h1 class="page-title">Guide</h1>
+      {guides.length > 0 && (
+        <p class="count">{guides.length} {guides.length === 1 ? 'guida' : 'guide'}</p>
+      )}
+    </header>
+
+    {guides.length > 0 ? (
+      <div class="guide-grid">
+        {guides.map((g) => <GuideCard guide={g} />)}
+      </div>
+    ) : (
+      <p class="empty-state">Non ci sono ancora guide.</p>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .page-wrap {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem) 4rem;
+  }
+
+  .page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .5rem 2rem;
+    padding: clamp(2rem, 6vw, 5rem) 0 1.25rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .page-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2.2rem, 10vw, 7rem);
+    font-weight: 600;
+    letter-spacing: -.04em;
+    line-height: .95;
+  }
+  .count { font-size: .8rem; color: var(--color-muted); }
+
+  .guide-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .7rem;
+  }
+  @media (min-width: 640px) { .guide-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; } }
+  @media (min-width: 1024px) { .guide-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; } }
+
+  .empty-state { padding: 3rem 0; color: var(--color-muted); }
+</style>

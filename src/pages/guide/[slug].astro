@@ -1,0 +1,133 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GuideArticle from '../../components/GuideArticle.astro';
+import { getGuideBySlug } from '../../lib/recipes';
+
+const { slug } = Astro.params;
+const guide = getGuideBySlug(slug ?? '');
+if (!guide) return new Response(null, { status: 404 });
+
+const toSrc = (image?: string) => image ? (image.startsWith('http') ? image : `/${image}`) : undefined;
+const coverSrc = toSrc(guide.image);
+---
+
+{guide.kind === 'single' ? (
+  <BaseLayout title={guide.title} image={coverSrc} back="/guide" backLabel="Guide" section="guide">
+    <GuideArticle doc={guide.doc} />
+  </BaseLayout>
+) : (
+  <BaseLayout title={guide.title} image={coverSrc} back="/guide" backLabel="Guide" section="guide">
+    <div class="collection-wrap">
+      <header class="collection-header">
+        <p class="collection-kind">{`Raccolta · ${guide.chapters.length} ${guide.chapters.length === 1 ? 'capitolo' : 'capitoli'}`}</p>
+        <h1 class="collection-title">{guide.title}</h1>
+        {guide.tags.length > 0 && (
+          <div class="collection-tags">
+            {guide.tags.map((tag) => <a href={`/tag/${encodeURIComponent(tag)}`} class="tag">{tag}</a>)}
+          </div>
+        )}
+      </header>
+
+      {coverSrc && (
+        <figure class="collection-figure">
+          <img src={coverSrc} alt="" decoding="async" />
+        </figure>
+      )}
+
+      <ol class="chapter-list">
+        {guide.chapters.map((chapter, i) => (
+          <li>
+            <a href={`/guide/${guide.slug}/${chapter.slug}`} class="chapter-row">
+              <span class="chapter-num" aria-hidden="true">{i + 1}</span>
+              <span class="chapter-title">{chapter.title}</span>
+              {chapter.image && (
+                <img class="chapter-thumb" src={toSrc(chapter.image)} alt="" loading="lazy" decoding="async" />
+              )}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </BaseLayout>
+)}
+
+<style>
+  .collection-figure { margin: 0 0 1.5rem; }
+  .collection-figure img {
+    width: auto;
+    max-width: 100%;
+    max-height: 50vh;
+    margin-inline: auto;
+    border-radius: var(--radius-md);
+  }
+
+  .collection-wrap {
+    max-width: calc(37rem + 2 * clamp(1rem, 4vw, 3rem));
+    margin: 0 auto;
+    padding: 1.5rem clamp(1rem, 4vw, 3rem) 4rem;
+  }
+
+  .collection-header {
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .collection-kind {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    margin-bottom: .5rem;
+  }
+  .collection-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 7vw, 4rem);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -.03em;
+    text-wrap: balance;
+  }
+  .collection-tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+
+  .chapter-list { list-style: none; }
+  .chapter-list li + li { border-top: 1px solid var(--color-border); }
+
+  .chapter-row {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .9rem;
+    padding: 1rem 0;
+    color: var(--color-text);
+  }
+  .chapter-row:hover { color: var(--color-text); }
+  .chapter-row:hover .chapter-title { color: var(--color-accent); }
+
+  .chapter-num {
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-tag-bg);
+    color: var(--color-tag-text);
+    font-size: .8rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .chapter-title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.1rem, 4vw, 1.45rem);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -.015em;
+    transition: color .12s ease;
+  }
+  .chapter-thumb {
+    width: 4.5rem;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-alt);
+  }
+  @media (min-width: 640px) { .chapter-thumb { width: 6rem; } }
+</style>
